@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Cadastro</h1>
+<form action="/cadastro" method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.nome.label }}
+    {{ form.nome() }}
+    {{ form.email.label }}
+    {{ form.email() }}
+    {{ form.data_nascimento.label }}
+    {{ form.data_nascimento() }}
+    {{ form.senha.label }}
+    {{ form.senha() }}
+    {{ form.confirmar_senha.label }}
+    {{ form.confirmar_senha() }}
+    {{ form.submit() }}
+</form>
+
+{% endblock %}

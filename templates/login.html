@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Login</h1>
+<form action="/login">
+    <label for="email">Email</label>
+    <input type="text" name="email" id="email">
+
+    <label for="senha">Senha</label>
+    <input type="password" name="senha" id="senha">
+</form>
+
+<p>Ainda não é cadastrado? </p><a href="{{ url_for('usuarios.cadastro') }}">Cadastro</a>
+{% endblock %}
