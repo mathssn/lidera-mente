@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>LideraMente</h1>
+
+<p>Olá, seja bem vindo {{ session.get('nome') }}</p>
+
+<ul>
+    <li><a href="{{ url_for('agenda.agenda') }}">Agenda</a></li>
+</ul>
+{% endblock %}

@@ -9,10 +9,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 def insert_usuario(target, connection, **kw):
     connection.execute(
         Usuario.__table__.insert(),
-            ({"nome": 'admin', "email": 'admin@gmail.com', "senha": generate_password_hash('1234'), "data_nascimento": date(2000, 1, 1)})
+            ({"nome": 'admin', "email": 'admin@gmail.com', "senha": generate_password_hash('12345678'), "data_nascimento": date(2000, 1, 1)})
         )
     
     connection.execute(
         Usuario.__table__.insert(),
-            ({"nome": 'teste', "email": 'teste@gmail.com', "senha": generate_password_hash('1234'), "data_nascimento": date(2000, 1, 1)})
+            ({"nome": 'teste', "email": 'teste@gmail.com', "senha": generate_password_hash('12345678'), "data_nascimento": date(2000, 1, 1)})
         )

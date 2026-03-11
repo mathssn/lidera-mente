@@ -13,12 +13,12 @@ class Usuario(Base):
     data_nascimento = Column(Date, nullable=False)
     senha = Column(String(255), nullable=False)
 
-class Compromisso(Base):
-    __tablename__ = 'compromisso'
+class Evento(Base):
+    __tablename__ = 'evento'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(100), nullable=False)
-    descricao = Column(String(100), nullable=False, unique=True)
+    titulo = Column(String(100), nullable=False)
+    descricao = Column(String(400))
     data_hora = Column(DateTime, nullable=False)
     completado = Column(Boolean, nullable=False)
     usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
@@ -28,9 +28,9 @@ class Feedback(Base):
     __tablename__ = 'feedback'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(100), nullable=False)
-    descricao = Column(String(100), nullable=False, unique=True)
-    compromisso_id = Column(Integer, ForeignKey("compromisso.id"), nullable=False)
+    titulo = Column(String(100), nullable=False)
+    descricao = Column(String(400))
+    compromisso_id = Column(Integer, ForeignKey("evento.id"), nullable=False)
 
 
 class Emoção(Base):
@@ -38,7 +38,7 @@ class Emoção(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     humor = Column(String(30), nullable=False)
-    descricao = Column(String(100), nullable=False, unique=True)
+    descricao = Column(String(400))
     data = Column(Date, nullable=False)
     usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
 

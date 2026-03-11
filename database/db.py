@@ -4,8 +4,6 @@ from contextlib import contextmanager
 from dotenv import load_dotenv
 import os
 
-db = create_engine("sqlite:///database/db.db")
-
 load_dotenv()
 db_name = os.environ.get('DB_NAME')
 username = os.environ.get('DB_USERNAME')

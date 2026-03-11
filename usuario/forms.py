@@ -10,3 +10,10 @@ class CadastroForm(FlaskForm):
     senha = PasswordField('Senha', validators=[DataRequired(), Length(min=8)])
     confirmar_senha = PasswordField('Confirmar senha', validators=[DataRequired(), EqualTo('senha', 'Senhas diferentes')])
     submit = SubmitField("Enviar")
+
+
+
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    senha = PasswordField('Senha', validators=[DataRequired(), Length(min=8)])
+    submit = SubmitField("Enviar")

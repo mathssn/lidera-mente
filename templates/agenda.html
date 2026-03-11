@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>LideraMente</h1>
+
+<button type="button" data-bs-toggle="modal" data-bs-target="#cadastroEventoModal">
+    Novo evento
+</button>
+
+{% if eventos | length == 0 %}
+    <p>Ainda não há eventos!</p>
+{% else %}
+<ul>
+    {% for evento in eventos %}
+        <li>{{ evento.titulo }} {{ evento.data_hora }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<table id="calendario" class="table table-bordered"></table>
+
+
+<div class="modal fade" id="cadastroEventoModal" tabindex="-1" aria-labelledby="cadastroEventoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+    <form action="{{ url_for('agenda.cadastrar_evento') }}" method="POST">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="cadastroEventoModalLabel">Cadastrar evento</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          {{ form_evento.hidden_tag() }}
+            
+            <div class="mb-3">
+                {{ form_evento.titulo.label }}
+                {{ form_evento.titulo(class='form-control') }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form_evento.descricao.label }}
+                {{ form_evento.descricao(class='form-control') }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form_evento.data_hora.label }}
+                {{ form_evento.data_hora(class='form-control', type='datetime-local') }}
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            {{ form_evento.submit(class='btn btn-primary') }}
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<script>
+    let ano = {{ data[0] }}
+    let mes = {{ data[1] }}
+    
+function carregarCalendario(ano, mes) {
+
+    fetch('/calendario/' + ano + '/' + mes)
+    .then(r => r.json())
+    .then(data => {
+
+        let semanas = data.semanas
+
+        const tabela = document.getElementById("calendario")
+
+        // limpa conteúdo antigo
+        tabela.innerHTML = ""
+
+        // HEADER
+        const thead = document.createElement("thead")
+        const trHead = document.createElement("tr")
+
+        const dias = ["Dom","Seg","Ter","Qua","Qui","Sex","Sab"]
+
+        dias.forEach(d => {
+            const th = document.createElement("th")
+            th.textContent = d
+            trHead.appendChild(th)
+        })
+
+        thead.appendChild(trHead)
+        tabela.appendChild(thead)
+
+        // BODY
+        const tbody = document.createElement("tbody")
+
+        semanas.forEach(semana => {
+
+            const tr = document.createElement("tr")
+
+            semana.forEach(dia => {
+                const td = document.createElement("td")
+                td.textContent = dia
+                tr.appendChild(td)
+            })
+
+            tbody.appendChild(tr)
+
+        })
+
+        tabela.appendChild(tbody)
+
+    })
+}
+
+// primeira execução
+carregarCalendario(ano, mes)
+</script>
+{% endblock %}
