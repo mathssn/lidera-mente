@@ -7,6 +7,7 @@ from utils.utils import login_required
 
 from usuario.usuarios import usuarios_bp
 from agenda.agenda import agenda_bp
+from emocoes.emocoes import emocao_bp
 
 app = Flask(__name__)
 app.secret_key = '1234'
@@ -29,4 +30,5 @@ if __name__ == '__main__':
     Base.metadata.create_all(bind=db)
     app.register_blueprint(usuarios_bp)
     app.register_blueprint(agenda_bp)
+    app.register_blueprint(emocao_bp)
     app.run(debug=True)

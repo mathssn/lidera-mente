@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Emoções</h1>
+
+<div style="display: flex; flex-direction: column; align-items: center;">
+
+<button type="button" data-bs-toggle="modal" data-bs-target="#cadastrarEventoModal">
+    Novo evento
+</button>
+
+</div>
+
+<div class="container py-4">
+{% if emocoes | length == 0 %}
+  <div class="card mb-3 shadow" style="border: 0px; border-radius: 15px;">
+    <div class="card-body">
+        <p>Ainda não há emoções registradas</p>
+    </div>
+  </div>
+{% else %}
+    {% for emocao in emocoes %}
+    <div class="card mb-3 shadow" style="border: 0px; border-radius: 15px;">
+        <div class="card-body">
+            <h4>{{ emocao.humor }} {{ emocao.data }}</h4>
+            <p>{{ emocao.descricao }}</p>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+</div>
+
+{% endblock %}

@@ -33,8 +33,8 @@ class Feedback(Base):
     compromisso_id = Column(Integer, ForeignKey("evento.id"), nullable=False)
 
 
-class Emoção(Base):
-    __tablename__ = 'emoção'
+class Emocao(Base):
+    __tablename__ = 'emocao'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     humor = Column(String(30), nullable=False)
@@ -42,3 +42,7 @@ class Emoção(Base):
     data = Column(Date, nullable=False)
     usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
 
+
+"""
+INSERT INTO emocao (humor, descricao, data, usuario_id) VALUES ('Feliz', 'aa', '2026-03-14', 2), ('Cansado', 'aa', '2026-03-13', 2);
+"""
