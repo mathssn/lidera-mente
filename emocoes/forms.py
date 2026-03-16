@@ -1,19 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, DateField, SubmitField
-from wtforms.validators import DataRequired, Length, Email, EqualTo
+from wtforms import TextAreaField, SelectField, DateField, SubmitField
+from wtforms.validators import DataRequired
 
 
 class EmocaoForm(FlaskForm):
-    nome = StringField('Nome', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    data_nascimento = DateField('Data de Nascimento', validators=[DataRequired()])
-    senha = PasswordField('Senha', validators=[DataRequired(), Length(min=8)])
-    confirmar_senha = PasswordField('Confirmar senha', validators=[DataRequired(), EqualTo('senha', 'Senhas diferentes')])
+    humor = SelectField(
+        'Como está seu humor?', validators=[DataRequired()],
+        choices=[
+            ('feliz', '😃 Feliz'),
+            ('triste', '😕 Triste'),
+            ('entediado', '😐 Entediado'),
+            ('raiva', '😡 Raiva')
+        ]
+    )
+    descricao = TextAreaField('Descrição', validators=[DataRequired()])
+    data_field = DateField('Data', validators=[DataRequired()])
     submit = SubmitField("Enviar")
 
-
-
-class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    senha = PasswordField('Senha', validators=[DataRequired(), Length(min=8)])
-    submit = SubmitField("Enviar")

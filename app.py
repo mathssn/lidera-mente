@@ -20,11 +20,17 @@ def index():
     return render_template('index.html')
 
 
-
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html')
+
+
+@app.template_filter('format_date')
+def format_date(value, formato='%d/%m/%Y'):
+    if isinstance(value, date):
+        return value.strftime(formato)
+    return value
 
 if __name__ == '__main__':
     Base.metadata.create_all(bind=db)

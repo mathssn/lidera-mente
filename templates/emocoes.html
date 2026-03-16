@@ -6,8 +6,8 @@
 
 <div style="display: flex; flex-direction: column; align-items: center;">
 
-<button type="button" data-bs-toggle="modal" data-bs-target="#cadastrarEventoModal">
-    Novo evento
+<button type="button" data-bs-toggle="modal" data-bs-target="#cadastrarEmocaoModal">
+    Adicionar
 </button>
 
 </div>
@@ -22,13 +22,111 @@
 {% else %}
     {% for emocao in emocoes %}
     <div class="card mb-3 shadow" style="border: 0px; border-radius: 15px;">
-        <div class="card-body">
-            <h4>{{ emocao.humor }} {{ emocao.data }}</h4>
-            <p>{{ emocao.descricao }}</p>
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div style="word-break: break-word; overflow-wrap: break-word; min-width: 0; flex: 1;">
+                <h4>{{ emocoes_dict[emocao.humor] }} {{ emocao.data | format_date }}</h4>
+                <p>{{ emocao.descricao }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#editEmocaoModal"
+                onclick="fillEmocaoEditForm('{{ emocao.id }}', '{{ emocao.humor }}', '{{ emocao.descricao | escape }}', '{{ emocao.data }}')"
+                ><i class="bi bi-pencil-square"></i></i></button>
+                <form action="{{ url_for('emocao.excluir_emocao', emocao_id=emocao.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este item?')">
+                    <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
         </div>
     </div>
     {% endfor %}
 {% endif %}
 </div>
+
+
+<div class="modal fade" id="cadastrarEmocaoModal" tabindex="-1" aria-labelledby="cadastrarEmocaoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+    <form action="{{ url_for('emocao.cadastrar_emocao') }}" method="POST">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="cadastrarEmocaoModalLabel">Adicionar uma nova emoção</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          {{ form.hidden_tag() }}
+            
+            <div class="mb-3">
+                {{ form.humor.label }}
+                {{ form.humor(class='form-select') }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.descricao.label }}
+                {{ form.descricao(class='form-control', rows=5) }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.data_field.label }}
+                {{ form.data_field(class='form-control', type='date') }}
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            {{ form.submit(class='btn btn-primary') }}
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+<div class="modal fade" id="editEmocaoModal" tabindex="-1" aria-labelledby="editEmocaoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+    <form id="editEmocaoForm" method="POST">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editEmocaoModalLabel">Editar</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          {{ form_ed.hidden_tag() }}
+            
+            <div class="mb-3">
+                {{ form_ed.humor.label }}
+                {{ form_ed.humor(class='form-select', id='edit_humor') }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form_ed.descricao.label }}
+                {{ form_ed.descricao(class='form-control', rows=5, id='edit_descricao') }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form_ed.data_field.label }}
+                {{ form_ed.data_field(class='form-control', type='date', id='edit_data') }}
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            {{ form_ed.submit(class='btn btn-primary') }}
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+    function fillEmocaoEditForm(id, humor, descricao, data) {
+        document.getElementById("edit_humor").value = humor;
+        document.getElementById("edit_descricao").value = descricao;
+        document.getElementById("edit_data").value = data;
+
+        document.getElementById("editEmocaoForm").action = "{{ url_for('emocao.editar_emocao', emocao_id=0) }}".replace('0', id);
+    }
+</script>
 
 {% endblock %}
