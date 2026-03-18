@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from database.models import Usuario
 from database.db import get_session
-from usuario.forms import CadastroForm, LoginForm
+from modules.usuario.forms import CadastroForm, LoginForm
 
 usuarios_bp = Blueprint('usuarios', __name__, template_folder='templates')
 

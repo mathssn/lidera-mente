@@ -12,6 +12,8 @@ class Usuario(Base):
     email = Column(String(100), nullable=False, unique=True)
     data_nascimento = Column(Date, nullable=False)
     senha = Column(String(255), nullable=False)
+    ativo = Column(Boolean, nullable=False)
+    
 
 class Evento(Base):
     __tablename__ = 'evento'
@@ -21,7 +23,24 @@ class Evento(Base):
     descricao = Column(String(400))
     data_hora = Column(DateTime, nullable=False)
     completado = Column(Boolean, nullable=False)
-    usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
+
+
+class Tag(Base):
+    __tablename__ = 'tag'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome = Column(String(100), nullable=False)
+    color = Column(String(20), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
+
+
+class TagEvento(Base):
+    __tablename__ = 'tag_evento'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    compromisso_id = Column(Integer, ForeignKey("evento.id", ondelete="CASCADE"))
+    tag_id = Column(Integer, ForeignKey("tag.id", ondelete="CASCADE"))
 
 
 class Feedback(Base):
@@ -30,7 +49,8 @@ class Feedback(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     titulo = Column(String(100), nullable=False)
     descricao = Column(String(400))
-    compromisso_id = Column(Integer, ForeignKey("evento.id"), nullable=False)
+    compromisso_id = Column(Integer, ForeignKey("evento.id", ondelete="CASCADE"))
+    usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
 
 
 class Emocao(Base):
@@ -40,9 +60,5 @@ class Emocao(Base):
     humor = Column(String(30), nullable=False)
     descricao = Column(String(400))
     data = Column(Date, nullable=False)
-    usuario_id = Column(Integer, ForeignKey("usuario.id"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
 
-
-"""
-INSERT INTO emocao (humor, descricao, data, usuario_id) VALUES ('Feliz', 'aa', '2026-03-14', 2), ('Cansado', 'aa', '2026-03-13', 2);
-"""

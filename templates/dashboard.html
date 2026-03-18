@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 
+
+{% block titulo_nav %}
+LideraMente
+{% endblock %}
+
 {% block content %}
-<h1>LideraMente</h1>
 
 <p>Olá, seja bem vindo {{ session.get('nome') }}</p>
 
 <ul>
     <li><a href="{{ url_for('agenda.agenda') }}">Agenda</a></li>
     <li><a href="{{ url_for('emocao.emocoes') }}">Emoções</a></li>
+    <li><a href="{{ url_for('feedback.feedbacks') }}">Feedbacks</a></li>
 </ul>
 {% endblock %}

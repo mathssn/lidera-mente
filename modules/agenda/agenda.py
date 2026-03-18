@@ -2,11 +2,11 @@ from flask import Blueprint, session, redirect, flash, render_template, url_for,
 from datetime import datetime
 import calendar
 
-from utils.utils import login_required
+from modules.utils import login_required
 from database.db import get_session
 from database.models import Evento
 
-from agenda.forms import EventoForm
+from modules.agenda.forms import EventoForm
 
 agenda_bp = Blueprint('agenda', __name__, template_folder='templates')
 
@@ -16,21 +16,9 @@ meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'A
 @login_required
 def agenda():
     form_evento = EventoForm()
-    user_id = session.get('user_id')
 
     ano_atual = datetime.now().year
     mes_atual = datetime.now().month
-    
-    try:
-        with get_session() as db:
-            eventos = db.query(Evento).filter_by(usuario_id=user_id).limit(10).all()
-            eventos = [
-                {'id': e.id, 'titulo': e.titulo, 'descricao': e.descricao, 'data_hora': e.data_hora.isoformat(), 'completado': e.completado, 'usuario_id': e.usuario_id} for e in eventos
-            ]
-    except Exception as e:
-        print(e)
-        flash('Erro inesperado!', 'danger')
-        return redirect('/')
 
     return render_template('agenda.html', form_evento=form_evento, data=[ano_atual, mes_atual])
 

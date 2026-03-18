@@ -1,9 +1,9 @@
-from flask import Blueprint, session, redirect, flash, render_template, url_for, jsonify
+from flask import Blueprint, session, redirect, flash, render_template, url_for, request
 
-from utils.utils import login_required
+from modules.utils import login_required
 from database.db import get_session
 from database.models import Emocao
-from emocoes.forms import EmocaoForm
+from modules.emocoes.forms import EmocaoForm
 
 
 emocao_bp = Blueprint('emocao', __name__, template_folder='templates')
@@ -15,16 +15,42 @@ emocoes_dict = {'feliz': '😃 Feliz', 'triste': '😕 Triste', 'entediado': '�
 def emocoes():
     form = EmocaoForm()
     form_ed = EmocaoForm() # Form de edição
+
+    page = session.pop('page', None)
+    if not page:
+        page = 1
+    per_page = 20
+    offset = (page - 1) * per_page
+
     try:
         with get_session() as db:
-            emocoes_lista = db.query(Emocao).filter_by(usuario_id=session.get('user_id')).order_by(Emocao.data.desc()).all()
+            emocoes_lista = db.query(Emocao).filter_by(usuario_id=session.get('user_id')).order_by(Emocao.data.desc())
+            total = emocoes_lista.count()
+            total_pages = (total + per_page - 1) // per_page
+
+            emocoes_lista = emocoes_lista.offset(offset).limit(per_page).all()
     except Exception as e:
         print(e)
         flash('Não foi possiveil carregar a pagina!', 'danger')
         return redirect(url_for('dashboard'))
     
-    return render_template('emocoes.html', emocoes=emocoes_lista, form=form, emocoes_dict=emocoes_dict, form_ed=form_ed)
+    return render_template('emocoes.html', emocoes=emocoes_lista, form=form, emocoes_dict=emocoes_dict, form_ed=form_ed, total_pages=total_pages, page=page)
     
+
+@emocao_bp.route('/paginacao', methods=['POST'])
+@login_required
+def paginacao():
+    try:
+        page = int(request.form.get('page'))
+        if page < 1:
+            page = 1
+        session['page'] = page
+    except Exception as e:
+        print(e)
+        flash('Não foi possivel processar a requisição', 'danger')
+
+    return redirect(url_for('emocao.emocoes'))    
+
 
 @emocao_bp.route('/cadastrar/emocao', methods=['POST'])
 @login_required
