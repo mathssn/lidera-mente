@@ -1,3 +1,6 @@
+:root {
+  --blue-100: #cfe2ff; /* valor do Bootstrap */
+}
 
 #messages {
         position: fixed;

@@ -12,7 +12,7 @@ class Usuario(Base):
     email = Column(String(100), nullable=False, unique=True)
     data_nascimento = Column(Date, nullable=False)
     senha = Column(String(255), nullable=False)
-    ativo = Column(Boolean, nullable=False)
+    ativo = Column(Boolean, nullable=False, default=True)
     
 
 class Evento(Base):
@@ -49,7 +49,8 @@ class Feedback(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     titulo = Column(String(100), nullable=False)
     descricao = Column(String(400))
-    compromisso_id = Column(Integer, ForeignKey("evento.id", ondelete="CASCADE"))
+    data = Column(Date, nullable=False)
+    evento_id = Column(Integer, ForeignKey("evento.id", ondelete="CASCADE"))
     usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
 
 

@@ -65,6 +65,12 @@ function carregarCalendario(ano, mes) {
 
                 // mostrar só o dia
                 td.textContent = parseInt(dia)
+                td.style.height = "100px"
+
+                const agora = new Date();
+                if (agora.getDate() == dia && agora.getMonth()+1 == mesData && agora.getFullYear() == anoData) {
+                    td.style.backgroundColor = "var(--blue-100)"
+                }
 
                 // data formato ISO para comparar eventos
                 const dataISO = `${anoData}-${mesData}-${dia}`
@@ -112,46 +118,106 @@ function carregarCalendario(ano, mes) {
 
 function fillEventModal(data, eventosPorData, dataCompleta) {
 
-    const list = document.getElementById("eventos-lista")
+    const divEventos = document.getElementById("eventos-lista")
     const titulo = document.getElementById("mostrarEventoModalLabel")
 
-    list.innerHTML = ""
+    divEventos.innerHTML = ""
     titulo.textContent = "Eventos do dia " + dataCompleta
 
     if (!eventosPorData[data]) {
-        list.innerHTML = "<p>Nenhum evento neste dia</p>"
+        divEventos.innerHTML = "<p>Nenhum evento neste dia</p>"
         return
     }
 
+    const lista = document.createElement("ul")
+    lista.classList.add("list-group")
+
     eventosPorData[data].forEach(evento => {
-
-        const div = document.createElement("div")
-        div.classList.add("form-check")
-
-        const input = document.createElement("input")
-        input.type = "checkbox"
-        input.classList.add("form-check-input")
-
-        if (evento.completado) {
-            input.checked = true
-        }
-
-        input.addEventListener("change", () => checkEvent(evento.id))
-
-        div.appendChild(input)
-
-        const label = document.createElement("label")
-        label.textContent = evento.titulo
-        label.classList.add("form-check-label")
-
-        div.appendChild(label)
-
-        list.appendChild(div)
-
+        createListItemEvent(lista, evento)
     })
+
+    divEventos.appendChild(lista);
 }
 
-function checkEvent(eventId) {
+
+function createListItemEvent(lista, evento) {
+    const li = document.createElement("li")
+    li.classList.add("list-group-item")
+    li.classList.add("d-flex")
+    li.classList.add("justify-content-between")
+    li.classList.add("align-items-center")
+
+    const div = document.createElement("div")
+    div.classList.add("form-check")
+
+    const input = document.createElement("input")
+    input.type = "checkbox"
+    input.classList.add("form-check-input")
+
+    if (evento.completado) {
+        input.checked = true
+    }
+
+    input.addEventListener("change", () => checkEvent(evento.id, evento))
+
+    div.appendChild(input)
+
+    const label = document.createElement("label")
+    label.textContent = evento.titulo
+    label.classList.add("form-check-label")
+
+    div.appendChild(label)
+    li.appendChild(div)
+    createButtons(li)
+
+    lista.appendChild(li)
+}
+
+
+function createButtons(li) {
+    const div = document.createElement("div")
+    div.classList.add('d-flex')
+    div.classList.add('gap-2')
+
+    const edButton = document.createElement("button")
+    edButton.classList.add("btn", "btn-primary")
+
+    edButton.style.width = "32px"
+    edButton.style.height = "32px"
+    edButton.style.display = "flex"
+    edButton.style.alignItems = "center"
+    edButton.style.justifyContent = "center"
+    edButton.style.padding = "0" 
+
+    const i = document.createElement("i")
+    i.classList.add("bi", "bi-pencil-square")
+    i.style.fontSize = "16px"
+
+    edButton.appendChild(i)
+    div.appendChild(edButton)
+
+    const exButton = document.createElement("button")
+    exButton.classList.add("btn", "btn-danger")
+
+    exButton.style.width = "32px"
+    exButton.style.height = "32px"
+    exButton.style.display = "flex"
+    exButton.style.alignItems = "center"
+    exButton.style.justifyContent = "center"
+    exButton.style.padding = "0" 
+
+    const i2 = document.createElement("i")
+    i2.classList.add("bi", "bi-trash")
+    i2.style.fontSize = "16px"
+
+    exButton.appendChild(i2)
+    div.appendChild(exButton)
+
+    li.appendChild(div)
+}
+
+
+function checkEvent(eventId, evento) {
     fetch(`/checar/evento/${eventId}`, {
         method: "POST"
     })
@@ -167,4 +233,6 @@ function checkEvent(eventId) {
     .catch(error => {
         console.error(error)
     })
+
+    evento.completado = !evento.completado
 }
