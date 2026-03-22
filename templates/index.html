@@ -1,6 +1,135 @@
 {% extends "base.html" %}
 
+{% block titulo_nav %}
+LideraMente
+{% endblock %}
+
 {% block content %}
-    <h1>Bem vindo ao LideraMente</h1>
-    <a href="{{ url_for('usuarios.login') }}">Login</a>
+
+<!-- HERO -->
+<div class="container py-5">
+  <div class="row align-items-center">
+    
+    <div class="col-md-6">
+      <h1 class="fw-bold" style="color: #B862ED;">
+        Liderança começa pela mente.
+      </h1>
+      <p class="mt-3 fs-5">
+        O <strong>LideraMente</strong> é uma plataforma criada para ajudar líderes a organizarem sua rotina, 
+        cuidarem da saúde mental e desenvolverem uma liderança mais consciente e equilibrada.
+      </p>
+
+      {% if 'user_id' not in session %}
+      <div class="mt-4">
+        <a href="/login" class="btn btn-lg me-2" style="background-color: #B862ED; color: white;">
+          Entrar
+        </a>
+        <a href="/cadastro" class="btn btn-lg btn-outline-dark">
+          Criar conta
+        </a>
+      </div>
+      {% else %}
+      <div class="mt-4">
+        <a href="/dashboard" class="btn btn-lg" style="background-color: #B862ED; color: white;">
+          Ir para Dashboard
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6 text-center">
+      <img src="{{ url_for('static', filename='images/logo.jpeg') }}" 
+           class="img-fluid" 
+           style="max-width: 300px; border-radius: 15px;">
+    </div>
+
+  </div>
+</div>
+
+<!-- SOBRE -->
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Por que usar o LideraMente?</h2>
+    <p class="text-muted">
+      Uma solução completa para líderes que querem produtividade com equilíbrio emocional.
+    </p>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Agenda -->
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body">
+          <i class="bi bi-calendar-event fs-1" style="color: #B862ED;"></i>
+          <h5 class="mt-3">Agenda Inteligente</h5>
+          <p class="text-muted">
+            Organize compromissos, reuniões e tarefas com clareza.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diário -->
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body">
+          <i class="bi bi-journal-text fs-1" style="color: #B862ED;"></i>
+          <h5 class="mt-3">Diário de Emoções</h5>
+          <p class="text-muted">
+            Registre como você se sente e desenvolva inteligência emocional.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body">
+          <i class="bi bi-chat-dots fs-1" style="color: #B862ED;"></i>
+          <h5 class="mt-3">Registro de Feedbacks</h5>
+          <p class="text-muted">
+            Acompanhe feedbacks recebidos e evolução profissional.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Apoio -->
+    <div class="col-md-3">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body">
+          <i class="bi bi-heart fs-1" style="color: #B862ED;"></i>
+          <h5 class="mt-3">Apoio Emocional</h5>
+          <p class="text-muted">
+            Acesse conteúdos e materiais para cuidar da sua saúde mental.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="container py-5 text-center">
+  <div class="p-5 rounded shadow-sm" style="background-color: #F3E8FD;">
+    <h3 class="fw-bold">Comece a liderar melhor hoje</h3>
+    <p class="mt-3">
+      Pequenas mudanças na sua organização e no seu emocional podem gerar grandes resultados.
+    </p>
+
+    {% if 'user_id' not in session %}
+    <a href="/cadastro" class="btn btn-lg mt-3" style="background-color: #B862ED; color: white;">
+      Criar minha conta gratuita
+    </a>
+    {% else %}
+    <a href="/dashboard" class="btn btn-lg mt-3" style="background-color: #B862ED; color: white;">
+      Acessar minha área
+    </a>
+    {% endif %}
+  </div>
+</div>
+
 {% endblock %}

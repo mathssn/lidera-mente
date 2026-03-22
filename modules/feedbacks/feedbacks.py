@@ -1,4 +1,4 @@
-from flask import Blueprint, session, redirect, flash, render_template, url_for, jsonify
+from flask import Blueprint, session, redirect, flash, render_template, url_for, request
 from datetime import datetime, timedelta
 
 from modules.utils import login_required
@@ -36,7 +36,22 @@ def feedbacks():
     except Exception as e:
         print(e)
 
-    return render_template('feedbacks.html', feedbacks=feedbacks_, form=form, eventos=eventos, form_ed=form_ed)
+    return render_template('feedbacks.html', feedbacks=feedbacks_, form=form, eventos=eventos, form_ed=form_ed, total_pages=total_pages, page=page)
+
+
+@feedbacks_bp.route('/paginacao_fb', methods=['POST'])
+@login_required
+def paginacao_fb():
+    try:
+        page = int(request.form.get('page'))
+        if page < 1:
+            page = 1
+        session['page'] = page
+    except Exception as e:
+        print(e)
+        flash('Não foi possivel processar a requisição', 'danger')
+
+    return redirect(url_for('feedback.feedbacks'))    
 
 @feedbacks_bp.route('/cadastrar/feedback', methods=['POST'])
 @login_required

@@ -37,9 +37,9 @@ def emocoes():
     return render_template('emocoes.html', emocoes=emocoes_lista, form=form, emocoes_dict=emocoes_dict, form_ed=form_ed, total_pages=total_pages, page=page)
     
 
-@emocao_bp.route('/paginacao', methods=['POST'])
+@emocao_bp.route('/paginacao_em', methods=['POST'])
 @login_required
-def paginacao():
+def paginacao_em():
     try:
         page = int(request.form.get('page'))
         if page < 1:

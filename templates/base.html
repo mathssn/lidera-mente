@@ -15,6 +15,25 @@
                 <img src="{{ url_for('static', filename='images/logo.jpeg') }}" alt="logo" style="width: 80px; border-radius: 5px;">
                 <span class="ms-2" style="color: white;">{% block titulo_nav %}{% endblock %}</span>
             </a>
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        {% if 'user_id' in session %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle user-menu" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+             aria-expanded="false" style="color: white;">
+            Olá, {{ session.get('nome', 'Usuario').split()[0] }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i>Perfil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="btn btn-light btn-sm px-3 fw-bold" href="/login" style="color: black; margin-right: 10px; border-radius: 10px;">Login</a>
+        </li>
+        {% endif %}
+      </ul>
         </div>
     </nav>
     {% with messages = get_flashed_messages(with_categories=True) %}
