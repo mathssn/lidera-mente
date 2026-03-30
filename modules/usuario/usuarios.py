@@ -1,12 +1,16 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
+from dotenv import load_dotenv
+import resend
 
 from database.models import Usuario
 from database.db import get_session
 from modules.usuario.forms import CadastroForm, LoginForm
 
 usuarios_bp = Blueprint('usuarios', __name__, template_folder='templates')
-
+load_dotenv()
+resend.api_key = os.environ.get('RESEND_API_KEY')
 
 @usuarios_bp.route('/login', methods=['POST', 'GET'])
 def login():

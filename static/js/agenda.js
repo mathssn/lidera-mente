@@ -30,12 +30,12 @@ function criarThead() {
     return thead
 }
 
-function criarTarjaEvento(titulo, reticencias = false) {
+function criarTarjaEvento(titulo, cor, reticencias = false) {
     const div = document.createElement("div")
     const texto = reticencias ? "..." : (titulo.length > 10 ? titulo.slice(0, 9) + "…" : titulo)
-    div.classList.add("event-tag")
 
     Object.assign(div.style, {
+        backgroundColor: cor,
         color: "#000000",
         borderRadius: "3px",
         fontSize: "11px",
@@ -93,12 +93,12 @@ function criarTd(dataCompleta, mes, eventosPorData) {
         // Exibe as duas primeiras tarjas
         const visiveis = eventos.slice(0, 2)
         visiveis.forEach(ev => {
-            td.appendChild(criarTarjaEvento(ev.titulo))
+            td.appendChild(criarTarjaEvento(ev.titulo, ev.color))
         })
 
         // Se houver 3 ou mais, adiciona tarja "..."
         if (eventos.length > 2) {
-            td.appendChild(criarTarjaEvento(null, true))
+            td.appendChild(criarTarjaEvento(null, "#D29BF4", true))
         }
     }
 

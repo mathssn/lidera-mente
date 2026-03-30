@@ -1,3 +1,11 @@
+function rgbToHex(rgb) {
+    const match = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/)
+    if (!match) return rgb
+    return '#' + [match[1], match[2], match[3]]
+        .map(n => parseInt(n).toString(16).padStart(2, '0'))
+        .join('')
+}
+
 function createIcon(iconClass) {
     const i = document.createElement("i")
     i.classList.add("bi", iconClass)
@@ -29,6 +37,16 @@ function createIconButton(btnClass, iconClass, evento) {
             document.getElementById('edit_titulo').value = evento.titulo
             document.getElementById('edit_descricao').value = evento.descricao
             document.getElementById('edit_data_hora').value = evento.data_hora
+
+            const corInput = document.getElementById('edit_cor_input')
+            corInput.value = evento.color
+
+            document.querySelectorAll('#editEventoModal .color-box').forEach(el => {
+                el.style.outline = 'none'
+                if (el.style.backgroundColor === evento.color || rgbToHex(el.style.backgroundColor) === evento.color.toLowerCase()) {
+                    el.style.outline = '3px solid black'
+                }
+            })
     
             document.getElementById("editEventoForm").action = "/editar/evento/0".replace('0', evento.id);
         })

@@ -23,24 +23,8 @@ class Evento(Base):
     descricao = Column(String(400))
     data_hora = Column(DateTime, nullable=False)
     completado = Column(Boolean, nullable=False)
+    color = Column(String(400))
     usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
-
-
-class Tag(Base):
-    __tablename__ = 'tag'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    nome = Column(String(100), nullable=False)
-    color = Column(String(20), nullable=False)
-    usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
-
-
-class TagEvento(Base):
-    __tablename__ = 'tag_evento'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    compromisso_id = Column(Integer, ForeignKey("evento.id", ondelete="CASCADE"))
-    tag_id = Column(Integer, ForeignKey("tag.id", ondelete="CASCADE"))
 
 
 class Feedback(Base):
@@ -63,3 +47,14 @@ class Emocao(Base):
     data = Column(Date, nullable=False)
     usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
 
+
+class Conteudo(Base):
+    __tablename__ = 'conteudo'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    titulo = Column(String(100), nullable=False)
+    descricao = Column(String(400))
+    assunto = Column(String(100))
+    tipo = Column(String(100), nullable=False)
+    link = Column(String(400))
+    ativo = Column(Boolean, nullable=False)

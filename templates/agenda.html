@@ -6,6 +6,13 @@ Agenda
 
 {% block content %}
 
+{% set cores = [
+'#D29BF4', '#C88FF0', '#BE83EB', '#B478E6', '#AA6DE1', '#DDB8F7',
+'#EFD5FF', '#F3DEFF', '#E8C7FA', '#F6E8FF', '#EAD2F9', '#F9F0FF',
+'#FAFFCC', '#F7FFC0', '#F4FFB3', '#FFFACD', '#FFF7B8', '#FFFDE0',
+'#E9F48C', '#E2EF7A', '#DBEA68', '#F1F8B0', '#EAF59E', '#F6FFD6'
+] %}
+
 <div class="container py-4">
 
   <!-- HEADER -->
@@ -15,8 +22,8 @@ Agenda
       <small class="text-muted">Organize seus compromissos e tarefas</small>
     </div>
 
-    <button class="btn d-flex align-items-center gap-2"
-            style="background-color: #B862ED; color: white; border-radius: 10px;"
+    <button class="btn d-flex align-items-center gap-2 botao-roxo"
+            style="border-radius: 10px;"
             data-bs-toggle="modal"
             data-bs-target="#cadastrarEventoModal">
       <i class="bi bi-plus-lg"></i>
@@ -52,7 +59,7 @@ Agenda
 
 <!-- FLOATING BUTTON (mobile style) -->
 <button class="btn shadow"
-        style="position: fixed; bottom: 20px; right: 20px; background-color: #B862ED; color: white; border-radius: 50%; width: 60px; height: 60px;"
+        style="position: fixed; bottom: 20px; right: 20px; background-color: #D29BF4; color: white; border-radius: 50%; width: 60px; height: 60px;"
         data-bs-toggle="modal"
         data-bs-target="#cadastrarEventoModal">
   <i class="bi bi-plus fs-3"></i>
@@ -101,7 +108,7 @@ Agenda
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-          {{ form.hidden_tag() }}
+          {{ form.csrf_token }}
             
             <div class="mb-3">
                 {{ form.titulo.label }}
@@ -117,6 +124,20 @@ Agenda
                 {{ form.data_hora.label }}
                 {{ form.data_hora(class='form-control', type='datetime-local') }}
             </div>
+
+            <div class="mb-3">
+              <label>Cor da etiqueta</label>
+              <div class="d-flex flex-wrap gap-2">
+                  {% for cor in cores %}
+                  <div 
+                      class="color-box"
+                      style="width:30px;height:30px;background-color:{{ cor }};cursor:pointer; border-radius:4px; "
+                      onclick="selectColor('{{ cor }}', this)">
+                  </div>
+                  {% endfor %}
+              </div>
+              {{ form.cor(id="cor_input") }}
+          </div>
 
         </div>
         <div class="modal-footer">
@@ -139,7 +160,7 @@ Agenda
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-          {{ form_ed.hidden_tag() }}
+          {{ form_ed.csrf_token }}
             
             <div class="mb-3">
                 {{ form_ed.titulo.label }}
@@ -155,6 +176,20 @@ Agenda
                 {{ form_ed.data_hora.label }}
                 {{ form_ed.data_hora(class='form-control', type='datetime-local', id='edit_data_hora') }}
             </div>
+
+            <div class="mb-3">
+              <label>Cor da etiqueta</label>
+              <div class="d-flex flex-wrap gap-2">
+                  {% for cor in cores %}
+                  <div 
+                      class="color-box"
+                      style="width:30px;height:30px;background-color:{{ cor }};cursor:pointer;border-radius:4px;"
+                      onclick="selectEditColor('{{ cor }}', this)">
+                  </div>
+                  {% endfor %}
+              </div>
+              {{ form_ed.cor(id="edit_cor_input") }}
+          </div>
 
         </div>
         <div class="modal-footer">
@@ -187,4 +222,25 @@ Agenda
 
 <div id="calendario-config" data-ano="{{ data[0] }}" data-mes="{{ data[1] }}"></div>
 <script type="module" src="{{ url_for('static', filename='js/agenda.js') }}"></script>
+<script>
+  function selectColor(cor, element) {
+    document.getElementById('cor_input').value = cor;
+    
+    document.querySelectorAll('.color-box').forEach(el => {
+      el.style.outline = 'none';
+    });
+    
+    element.style.outline = '3px solid black';
+}
+
+function selectEditColor(cor, element) {
+    document.getElementById('edit_cor_input').value = cor;
+
+    document.querySelectorAll('#editEventoModal .color-box').forEach(el => {
+        el.style.outline = 'none';
+    });
+
+    element.style.outline = '3px solid black';
+}
+</script>
 {% endblock %}

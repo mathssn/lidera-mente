@@ -53,3 +53,18 @@
     table-layout: fixed;
     width: 100%;
 }
+
+.botao-roxo {
+    background-color: #D29BF4;
+    color: white;
+}
+
+.botao-roxo:hover {
+    color: #D29BF4;
+    background-color: white;
+    border-color: #D29BF4;
+}
+
+.icone-roxo {
+    color: #D29BF4;
+}
