@@ -13,6 +13,7 @@ class Usuario(Base):
     data_nascimento = Column(Date, nullable=False)
     senha = Column(String(255), nullable=False)
     ativo = Column(Boolean, nullable=False, default=True)
+    email_confirmado = Column(Boolean, nullable=False, default=False)
     
 
 class Evento(Base):

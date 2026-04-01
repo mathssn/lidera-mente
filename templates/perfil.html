@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+
+{% block titulo_nav %}
+Perfil
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- HEADER -->
+  <div class="mb-4">
+    <h2 class="fw-bold">Meu Perfil 👤</h2>
+    <p class="text-muted">
+      Gerencie suas informações pessoais e segurança da conta.
+    </p>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- CARD PERFIL -->
+    <div class="col-md-8">
+      <div class="card shadow-sm" style="border-radius: 15px; border: none;">
+        <div class="card-body p-4">
+
+          <!-- LINHA SUPERIOR -->
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center">
+            <div class="me-3 position-relative">
+              <label for="uploadFoto" class="avatar-upload">
+                <div class="avatar-circle">
+
+                  <!-- IMAGEM -->
+                  <img src="{{ url_for('usuarios.perfil_img') }}"
+                      alt="Foto de perfil"
+                      class="avatar-img"
+                      id="avatarImg"
+                      onload="this.style.display='block';
+                          this.parentElement.querySelector('.fallback-avatar').style.display='none';
+                          document.getElementById('btnRemoverFoto').style.display='inline-flex';"
+                      onerror="this.style.display='none';
+                          this.parentElement.querySelector('.fallback-avatar').style.display='flex';
+                          document.getElementById('btnRemoverFoto').style.display='none';">
+
+                  <!-- FALLBACK (LETRA) -->
+                  <div id="fallbackAvatar" class="fallback-avatar">
+                    {{ usuario.nome[0] }}
+                  </div>
+
+                  <!-- OVERLAY -->
+                  <div class="overlay">
+                    <i class="bi bi-camera"></i>
+                  </div>
+
+                </div>
+              </label>
+
+              <input type="file" id="uploadFoto" hidden accept="image/*">
+
+              <!-- BOTÃO REMOVER FOTO (só aparece quando há foto) -->
+              <form action="{{ url_for('usuarios.remover_img') }}" method="POST" id="formRemoverFoto">
+                <button type="submit"
+                        id="btnRemoverFoto"
+                        class="btn btn-sm btn-danger position-absolute"
+                        style="display: none;
+                              bottom: -4px;
+                              right: -4px;
+                              width: 28px;
+                              height: 28px;
+                              padding: 0;
+                              border-radius: 50%;
+                              font-size: 12px;
+                              line-height: 1;
+                              align-items: center;
+                              justify-content: center;"
+                        title="Remover foto de perfil"
+                        onclick="return confirm('Tem certeza que deseja remover sua foto de perfil?');">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </form>
+
+            </div>
+
+            <div>
+              <h5 class="mb-0">{{ usuario.nome }}</h5>
+              <small class="text-muted">{{ usuario.email }}</small>
+            </div>
+            </div>
+            
+            <button
+            id="enableEditBtn"
+            class="btn btn-primary">
+            <i class="bi bi-pencil"></i>
+          </button>
+        </div>
+
+          <!-- DADOS -->
+          <form action="{{ url_for('usuarios.editar_usuario') }}" method="POST">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label text-muted">Nome</label>
+              <input class="form-control" name="nome" disabled value="{{ usuario.nome }}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-muted">E-mail</label>
+              <input class="form-control" name="email" disabled value="{{ usuario.email }}">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label text-muted">Data de Nascimento</label>
+              <input class="form-control" type="date" name="data_nascimento" disabled value="{{ usuario.data_nascimento }}">
+            </div>
+
+              <button id="salvar" class="btn btn-primary" type="submit" style="display: none;">Salvar</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD SEGURANÇA -->
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100 text-center" style="border-radius: 15px; border: none;">
+        <div class="card-body p-4">
+
+          <i class="bi bi-shield-lock fs-1 icone-roxo"></i>
+
+          <h5 class="mt-3">Segurança</h5>
+
+          <p class="text-muted">
+            Mantenha sua conta protegida atualizando sua senha regularmente.
+          </p>
+
+          <button class="btn botao-roxo"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalAlterarSenha">
+            Alterar senha
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal fade" id="modalAlterarSenha" tabindex="-1" aria-labelledby="modalAlterarSenhaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" action="{{ url_for('usuarios.alterar_senha') }}" method="POST">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalAlterarSenhaLabel">Alterar Senha</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="senhaAtual" class="form-label">Senha Atual</label>
+            <input type="password" class="form-control" id="senhaAtual" name="senha_atual" required>
+          </div>
+          <div class="mb-3">
+            <label for="novaSenha" class="form-label">Nova Senha</label>
+            <input type="password" class="form-control" id="novaSenha" name="nova_senha" required>
+          </div>
+          <div class="mb-3">
+            <label for="confirmarSenha" class="form-label">Confirmar Nova Senha</label>
+            <input type="password" class="form-control" id="confirmarSenha" name="confirmar_senha" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+    document.getElementById('uploadFoto').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('foto', file);
+
+    fetch("{{ url_for('usuarios.salvar_img') }}", {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.sucesso) {
+        // Atualiza a imagem na tela sem recarregar
+        const img = document.querySelector('.avatar-img');
+        img.src = "{{ url_for('usuarios.perfil_img') }}" + '?t=' + Date.now();
+        img.style.display = 'block';
+        document.getElementById('fallbackAvatar').style.display = 'none';
+
+        showFlash('success', 'Imagem atualizada com sucesso!');
+      } else {
+        alert('Erro ao salvar imagem: ' + (data.erro || 'Tente novamente.'));
+      }
+    })
+    .catch((e) => {alert('Erro na requisição.'); console.error(e);});
+  });
+
+  document.getElementById('enableEditBtn').addEventListener('click', function() {
+    const inputs = document.querySelectorAll('.card-body input');
+    inputs.forEach(input => input.disabled = !input.disabled);
+    const btnSalvar = document.getElementById('salvar');
+    if (btnSalvar.style.display === 'none') {
+      btnSalvar.style.display = 'inline-block';
+    } else {
+      btnSalvar.style.display = 'none';
+    }
+  });
+</script>
+
+{% endblock %}

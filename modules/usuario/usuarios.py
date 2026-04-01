@@ -1,12 +1,14 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, abort, send_from_directory, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
 import resend
+import glob
 
 from database.models import Usuario
 from database.db import get_session
 from modules.usuario.forms import CadastroForm, LoginForm
+from modules.utils import login_required
 
 usuarios_bp = Blueprint('usuarios', __name__, template_folder='templates')
 load_dotenv()
@@ -93,3 +95,148 @@ def cadastro():
     flash('Usuário cadastrado com sucesso', 'success')
     return redirect('/login')
 
+
+@usuarios_bp.route('/perfil')
+@login_required
+def perfil():
+    try:
+        with get_session() as db:
+            usuario = db.query(Usuario).filter_by(id=session.get('user_id')).first()
+            if not usuario:
+                flash('Não é possivel acessar o perfil do usuário', 'warning')
+                return redirect(url_for('logout'))
+    except Exception as e:
+        print(e)
+        flash('Erro inesperado', 'danger')
+        return redirect(url_for('dashboard'))
+
+    return render_template('perfil.html', usuario=usuario)
+
+
+@usuarios_bp.route('/alterar-senha')
+@login_required
+def alterar_senha():
+    pass
+
+
+
+@usuarios_bp.route('/perfil-img')
+@login_required
+def perfil_img():
+    pasta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'img-perfil')
+    
+    padrao = os.path.join(pasta, f"{session.get('user_id')}.*")
+    arquivos = glob.glob(padrao)
+
+    if not arquivos:
+        abort(404)
+
+    # Pega o primeiro arquivo encontrado
+    caminho_arquivo = arquivos[0]
+    nome_arquivo = os.path.basename(caminho_arquivo)
+
+    return send_from_directory(pasta, nome_arquivo)
+
+
+@usuarios_bp.route('/salvar-img', methods=['POST'])
+@login_required
+def salvar_img():
+    file = request.files.get('foto')   
+
+    if not file or file.filename == "":
+        flash('Selecione um arquivo', 'warning')
+        return jsonify({'sucesso': False})
+    
+    try:
+        with get_session() as session_db:
+            usuario = session_db.query(Usuario).filter_by(id=session.get('user_id')).first()
+            if not usuario:
+                flash('Não foi possivel identificar o usuário logado!', 'danger')
+                return redirect(url_for('dashboard'))
+            
+            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'img-perfil')
+            os.makedirs(upload_path, exist_ok=True)
+
+            files = os.listdir(upload_path)
+            for f in files:
+                name, ext = os.path.splitext(f)
+                if name == str(usuario.id):
+                    os.remove(os.path.join(upload_path, f))
+            
+            # O nome do arquivo será de acordo com o id da nota
+            _, ext = os.path.splitext(file.filename)
+            filepath = os.path.join(upload_path, str(usuario.id) + ext)
+            file.save(filepath)
+    except Exception as e:
+        flash('Erro ao fazer upload da imagem!', 'danger')
+        print(e)
+        return jsonify({'sucesso': False})
+
+    return jsonify({'sucesso': True})
+
+
+@usuarios_bp.route('/remover-img', methods=['POST'])
+@login_required
+def remover_img():
+    try:
+        with get_session() as session_db:
+            usuario = session_db.query(Usuario).filter_by(id=session.get('user_id')).first()
+            if not usuario:
+                flash('Não foi possivel identificar o usuário logado!', 'danger')
+                return redirect(url_for('dashboard'))
+            
+            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'img-perfil')
+            files = os.listdir(upload_path)
+            for f in files:
+                name, ext = os.path.splitext(f)
+                if name == str(usuario.id):
+                    os.remove(os.path.join(upload_path, f))       
+    except Exception as e:
+        flash('Erro ao deletar a imagem!', 'danger')
+        print(e)
+        return jsonify({'sucesso': False})
+
+    flash('Imagem removida!', 'success')
+    return redirect(url_for('usuarios.perfil'))
+
+
+
+@usuarios_bp.route('/editar/usuario', methods=['POST'])
+@login_required
+def editar_usuario():
+    try:
+        # Pegando dados do form
+        nome = request.form.get('nome')
+        email = request.form.get('email')
+        data_nascimento = request.form.get('data_nascimento')
+
+        with get_session() as db:
+            usuario = db.query(Usuario).filter_by(id=session.get('user_id')).first()
+
+            if not usuario:
+                flash('Usuário não encontrado', 'warning')
+                return redirect(url_for('usuarios.perfil'))
+                    
+            u = db.query(Usuario).filter_by(email=email).first()
+            if u:
+                flash('O email inserido já pertence a outro usuário', 'warning')
+                return redirect(url_for('usuarios.perfil'))
+
+            # Atualizando apenas se veio valor
+            if nome:
+                usuario.nome = nome
+            if email:
+                usuario.email = email
+            if data_nascimento:
+                usuario.data_nascimento = data_nascimento
+
+            db.commit()
+
+
+    except Exception as e:
+        print(e)
+        flash('Erro ao atualizar usuário', 'danger')
+        return redirect(url_for('usuarios.perfil'))
+    
+    flash('Usuário atualizado com sucesso!', 'success')
+    return redirect(url_for('usuarios.perfil'))

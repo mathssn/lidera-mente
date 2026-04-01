@@ -55,8 +55,11 @@ function createIconButton(btnClass, iconClass, evento) {
         const form = document.createElement("form")
         form.action = "/excluir/evento/0".replace('0', evento.id)
         form.method = "POST"
-        form.addEventListener("submit", () => {
-            return confirm('Tem certeza que deseja excluir este item?')
+        form.addEventListener("submit", (event) => {
+            const c = confirm('Tem certeza que deseja excluir este item?')
+            if (!c) {
+                event.preventDefault()
+            }
         })
 
         form.appendChild(button)
