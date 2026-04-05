@@ -16,12 +16,18 @@ Login
 
       <div class="mb-3">
         {{ form.email.label(class="form-label") }}
-        {{ form.email(class="form-control") }}
+        {{ form.email(class="form-control", autofocus=True) }}
       </div>
 
       <div class="mb-3">
         {{ form.senha.label(class="form-label") }}
-        {{ form.senha(class="form-control") }}
+        <div class="input-group">
+          {{ form.senha(class="form-control", id='password') }}
+
+          <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()" tabindex="-1">
+            <i id="toggle-icon" class="bi bi-eye"></i>
+          </button>
+        </div>
       </div>
 
       <div class="d-grid">
@@ -34,9 +40,48 @@ Login
         Ainda não tem conta?
         <a href="{{ url_for('usuarios.cadastro') }}">Cadastre-se</a>
       </small>
+      <small>
+        <p>
+          <a href="#" onclick="validateForgotPassword(event);">Esqueceu a senha?</a>
+        </p>
+      </small>
     </div>
 
   </div>
 </div>
+
+
+<form id="forgot-form" action="{{ url_for('usuarios.forgot_password') }}" method="POST">
+  <input type="hidden" name="email" id="forgot-email">
+</form>
+
+<script>
+  function togglePassword() {
+    const field = document.getElementById("password");
+    const icon = document.getElementById("toggle-icon");
+
+    if (field.type === "password") {
+      field.type = "text";
+      icon.classList.remove("bi-eye");
+      icon.classList.add("bi-eye-slash");
+    } else {
+      field.type = "password";
+      icon.classList.remove("bi-eye-slash");
+      icon.classList.add("bi-eye");
+    }
+  }
+
+  function validateForgotPassword(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+      alert('Por favor, insira seu email para recuperar a senha.');
+      return;
+    }
+    
+    document.getElementById('forgot-email').value = email;
+    document.getElementById('forgot-form').submit();
+  }
+</script>
 
 {% endblock %}

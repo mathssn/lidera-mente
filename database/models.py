@@ -58,4 +58,3 @@ class Conteudo(Base):
     assunto = Column(String(100))
     tipo = Column(String(100), nullable=False)
     link = Column(String(400))
-    ativo = Column(Boolean, nullable=False)

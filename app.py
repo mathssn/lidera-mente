@@ -1,5 +1,6 @@
 from flask import Flask, render_template, session, redirect, flash
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 import os
 
 from database.db import db, get_session
@@ -13,8 +14,10 @@ from modules.emocoes.emocoes import emocao_bp
 from modules.feedbacks.feedbacks import feedbacks_bp
 from modules.conteudos.conteudos import conteudos_bp
 
+load_dotenv()
+
 app = Flask(__name__)
-app.secret_key = '1234'
+app.secret_key = os.environ.get('SECRET_KEY')
 
 UPLOAD_FOLDER = os.path.join(os.path.abspath(os.curdir), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -47,13 +50,6 @@ def dashboard():
         eventos = []
 
     return render_template('dashboard.html', eventos=eventos)
-
-
-@app.route('/relaxamento')
-@login_required
-def relaxamento():
-    return render_template('relaxamento.html')
-
 
 @app.template_filter('format_date')
 def format_date(value, formato='%d/%m/%Y'):

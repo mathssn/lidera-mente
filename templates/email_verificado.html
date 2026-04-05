@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5 d-flex justify-content-center">
+  <div class="card shadow p-4" style="max-width: 400px; width: 100%; border-radius: 15px;">
+    
+    <h2 class="text-center mb-4">Email verificado<i class="bi bi-check2-circle"></i></h2>
+    <a href="{{ url_for('dashboard') }}">Ir para a pagina inicial</a>
+
+  </div>
+</div>
+
+{% endblock %}

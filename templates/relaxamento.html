@@ -8,12 +8,25 @@
 
 <div class="container py-4">
 
+  {% set is_admin = session.get('email') == 'lidera.mente@gmail.com' %}
+
   <!-- HEADER -->
-  <div class="text-center mb-5">
-    <h2 class="fw-bold">Área de relaxamento</h2>
-    <p class="text-muted">
-      Faça exercícios, relaxe e se sinta mais disposto para enfrentar o dia
-    </p>
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+      <h2 class="fw-bold mb-0">Área de relaxamento</h2>
+      <p class="text-muted mb-0">
+        Faça exercícios, relaxe e se sinta mais disposto para enfrentar o dia
+      </p>
+    </div>
+
+    {% if is_admin %}
+    <button class="btn botao-roxo d-flex align-items-center gap-2"
+            data-bs-toggle="modal"
+            data-bs-target="#cadastrarConteudoModal">
+      <i class="bi bi-plus-lg"></i>
+      Adicionar
+    </button>
+    {% endif %}
   </div>
 
   <!-- LISTA -->
@@ -22,9 +35,16 @@
     <div class="card-body">
       <i class="bi bi-journal-x fs-1 text-muted"></i>
       <p class="mt-3 mb-2">Nenhum exercício disponível no momento.</p>
-      <small class="text-muted">
-        Volte mais tarde 💭
-      </small>
+
+      {% if is_admin %}
+      <button class="btn botao-roxo mt-2"
+              data-bs-toggle="modal"
+              data-bs-target="#cadastrarConteudoModal">
+        Criar conteúdo
+      </button>
+      {% else %}
+      <small class="text-muted">Volte mais tarde 💭</small>
+      {% endif %}
     </div>
   </div>
 
@@ -32,29 +52,48 @@
 
   <div class="row g-4">
 
-    {% for conteudo in conteudos if conteudo.ativo %}
+    {% for conteudo in conteudos %}
     <div class="col-md-4">
 
       <div class="card h-100 shadow-sm conteudo-card" style="border-radius: 15px; overflow: hidden;">
 
         <!-- IMAGEM -->
         <img src="{{ url_for('conteudos.carregar_imagem', id=conteudo.id) }}"
-            class="card-img-top"
-            style="height: 180px; object-fit: cover;"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             class="card-img-top"
+             style="height: 180px; object-fit: cover;"
+             onerror="this.style.display='none'; document.getElementById('placeholder-{{conteudo.id}}').style.display='flex';"
+             {% if is_admin %}
+             onclick="document.getElementById('input-img-{{conteudo.id}}').click()"
+             {% endif %}>
 
-        <!-- PLACEHOLDER (sem d-flex, controlado só pelo JS) -->
-        <div class="align-items-center justify-content-center bg-light"
-            style="height: 180px; display: none;">
+        <!-- PLACEHOLDER -->
+        <div id="placeholder-{{conteudo.id}}"
+             class="align-items-center justify-content-center bg-light"
+             style="height: 180px; display: none; cursor: pointer;"
+             {% if is_admin %}
+             onclick="document.getElementById('input-img-{{conteudo.id}}').click()"
+             {% endif %}>
           <i class="bi bi-image text-muted fs-1"></i>
         </div>
+
+        {% if is_admin %}
+        <!-- UPLOAD IMAGEM -->
+        <form id="form-img-{{conteudo.id}}"
+              action="{{ url_for('conteudos.upload_imagem', conteudo_id=conteudo.id) }}"
+              method="POST"
+              enctype="multipart/form-data">
+          <input type="file"
+                 name="imagem"
+                 id="input-img-{{conteudo.id}}"
+                 style="display:none;"
+                 onchange="document.getElementById('form-img-{{conteudo.id}}').submit();">
+        </form>
+        {% endif %}
 
         <!-- CONTEÚDO -->
         <div class="card-body d-flex flex-column">
 
-          <h5 class="fw-bold">
-            {{ conteudo.titulo }}
-          </h5>
+          <h5 class="fw-bold">{{ conteudo.titulo }}</h5>
 
           <small class="mb-2 fw-bold" style="color: #D29BF4;">
             <i class="bi bi-tag"></i>
@@ -65,13 +104,34 @@
             {{ conteudo.descricao }}
           </p>
 
-          <!-- BOTÃO -->
           <a href="{{ conteudo.link }}"
              target="_blank"
              class="btn botao-roxo mt-2 d-flex align-items-center justify-content-center gap-2">
-            Acessar conteúdo
+            Acessar exercício
             <i class="bi bi-box-arrow-up-right"></i>
           </a>
+
+          {% if is_admin %}
+          <!-- AÇÕES -->
+          <div class="d-flex gap-2 mt-3">
+
+            <button class="btn btn-sm btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editConteudoModal"
+                    onclick="fillEditConteudo('{{conteudo.id}}','{{conteudo.titulo}}','{{conteudo.descricao}}','{{conteudo.assunto}}','{{conteudo.link}}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+
+            <form action="{{ url_for('conteudos.excluir_conteudo', conteudo_id=conteudo.id) }}"
+                  method="POST"
+                  onsubmit="return confirm('Excluir conteúdo?')">
+              <button class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+
+          </div>
+          {% endif %}
 
         </div>
 
@@ -81,12 +141,105 @@
     {% endfor %}
 
   </div>
-
   {% endif %}
-
 </div>
 
-<!-- HOVER EFFECT -->
+<!-- MODAL CADASTRO -->
+<div class="modal fade" id="cadastrarConteudoModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ url_for('conteudos.cadastrar_conteudo', tipo='relaxamento') }}" method="POST">
+        <div class="modal-header">
+          <h5>Adicionar exércicio</h5>
+        </div>
+        <div class="modal-body">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.titulo.label }}
+            {{ form.titulo(class='form-control mb-2') }}
+          </div>
+
+          <div class="mb-3">
+            {{ form.assunto.label }}
+            {{ form.assunto(class='form-control mb-2') }}
+          </div>
+
+          <div class="mb-3">
+            {{ form.descricao.label }}
+            {{ form.descricao(class='form-control mb-2', rows=5) }}
+          </div>
+
+          <div class="mb-3">
+            {{ form.link.label }}
+            {{ form.link(class='form-control') }}
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          {{ form.submit(class='btn btn-primary') }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal fade" id="editConteudoModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editConteudoForm" method="POST">
+        <div class="modal-header">
+          <h5>Editar exércicio</h5>
+        </div>
+        <div class="modal-body">
+
+          {{ form_ed.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form_ed.titulo.label }}
+            {{ form_ed.titulo(class='form-control mb-2', id='edit_titulo') }}
+          </div>
+
+          <div class="mb-3">
+            {{ form_ed.assunto.label }}
+            {{ form_ed.assunto(class='form-control mb-2', id='edit_assunto') }}
+          </div>
+          
+          <div class="mb-3">
+            {{ form_ed.descricao.label }}
+            {{ form_ed.descricao(class='form-control mb-2', id='edit_descricao') }}
+          </div>
+
+          <div class="mb-3">
+            {{ form_ed.link.label }}
+            {{ form_ed.link(class='form-control', id='edit_link') }}
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          {{ form_ed.submit(class='btn btn-primary') }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+function fillEditConteudo(id, titulo, descricao, assunto, link) {
+  document.getElementById('edit_titulo').value = titulo;
+  document.getElementById('edit_descricao').value = descricao;
+  document.getElementById('edit_assunto').value = assunto;
+  document.getElementById('edit_link').value = link;
+
+  document.getElementById("editConteudoForm").action =
+    "{{ url_for('conteudos.editar_conteudo', conteudo_id=0) }}".replace('0', id);
+}
+</script>
+
 <style>
 .conteudo-card {
   transition: 0.2s;

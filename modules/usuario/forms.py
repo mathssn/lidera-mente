@@ -17,3 +17,8 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     senha = PasswordField('Senha', validators=[DataRequired(), Length(min=8)])
     submit = SubmitField("Enviar")
+
+
+class DesativarContaForm(FlaskForm):
+    senha = PasswordField('Digite sua senha para confirmar', validators=[DataRequired(), Length(min=8)])
+    submit = SubmitField("Desativar conta")

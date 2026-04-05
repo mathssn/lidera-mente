@@ -140,6 +140,24 @@ Perfil
             Alterar senha
           </button>
 
+          <hr>
+
+          <button class="btn btn-outline-danger mt-2"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalDesativarConta">
+            Desativar conta
+          </button>
+
+          {% if not usuario.email_confirmado %}
+          <hr>
+
+          <form action="{{ url_for('usuarios.send_verification_email') }}" method="POST">
+            <button class="btn btn-outline-warning mt-2" type="submit">
+              Verificar conta
+            </button>
+          </form>
+          {% endif %}
+
         </div>
       </div>
     </div>
@@ -178,6 +196,41 @@ Perfil
   </div>
 </div>
 
+<div class="modal fade" id="modalDesativarConta" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('usuarios.desativar_conta') }}">
+      {{ desativar_conta_form.hidden_tag() }}
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">Desativar Conta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            Tem certeza que deseja desativar sua conta?
+          </p>
+          <p class="text-muted small">
+            Você poderá reativar depois fazendo login novamente.
+          </p>
+
+          <div class="mb-3">
+            {{ desativar_conta_form.senha.label }}
+            {{ desativar_conta_form.senha(class='form-control') }}
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          {{ desativar_conta_form.submit(class='btn btn-danger') }}
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
     document.getElementById('uploadFoto').addEventListener('change', function () {
     const file = this.files[0];
@@ -194,10 +247,16 @@ Perfil
     .then(data => {
       if (data.sucesso) {
         // Atualiza a imagem na tela sem recarregar
-        const img = document.querySelector('.avatar-img');
-        img.src = "{{ url_for('usuarios.perfil_img') }}" + '?t=' + Date.now();
-        img.style.display = 'block';
-        document.getElementById('fallbackAvatar').style.display = 'none';
+        const imgs = document.querySelectorAll('.avatar-img');
+        imgs.forEach(img => {
+          img.src = "{{ url_for('usuarios.perfil_img') }}" + '?t=' + Date.now();
+          img.style.display = 'block';
+        })
+
+        const fallbacks = document.querySelectorAll('#fallbackAvatar');
+        fallbacks.forEach(el => {
+            el.style.display = 'none';
+        });
 
         showFlash('success', 'Imagem atualizada com sucesso!');
       } else {

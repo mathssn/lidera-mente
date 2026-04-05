@@ -2,6 +2,12 @@
   --blue-100: #cfe2ff; /* valor do Bootstrap */
 }
 
+.navbar-nav .dropdown-menu {
+    position: absolute !important;
+    right: 0;
+    margin-top: 10px;
+}
+
 #messages {
         position: fixed;
         top: 20px;

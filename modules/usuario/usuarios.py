@@ -1,18 +1,45 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, abort, send_from_directory, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
 from dotenv import load_dotenv
+from itsdangerous import URLSafeTimedSerializer
+import os
 import resend
 import glob
 
 from database.models import Usuario
 from database.db import get_session
-from modules.usuario.forms import CadastroForm, LoginForm
+from modules.usuario.forms import CadastroForm, LoginForm, DesativarContaForm
 from modules.utils import login_required
 
 usuarios_bp = Blueprint('usuarios', __name__, template_folder='templates')
 load_dotenv()
 resend.api_key = os.environ.get('RESEND_API_KEY')
+
+
+def generate_reset_token(email):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt='password-reset-salt')
+
+def verify_reset_token(token, expiration=3000):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
+        return email
+    except:
+        return None
+    
+def generate_email_verification_token(email):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt='email-confirm')
+
+def verify_email_verification_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(token, salt='email-confirm', max_age=expiration)
+    except Exception:
+        return None
+    return email
+
 
 @usuarios_bp.route('/login', methods=['POST', 'GET'])
 def login():
@@ -45,6 +72,7 @@ def login():
                 nome += letra
             session['nome'] = nome
             session['sobrenome'] = sobrenome
+            session['email'] = user.email
     except Exception as e:
         print(e)
         flash('Erro inesperado!', 'danger')
@@ -99,6 +127,7 @@ def cadastro():
 @usuarios_bp.route('/perfil')
 @login_required
 def perfil():
+    desativar_conta_form = DesativarContaForm()
     try:
         with get_session() as db:
             usuario = db.query(Usuario).filter_by(id=session.get('user_id')).first()
@@ -110,14 +139,123 @@ def perfil():
         flash('Erro inesperado', 'danger')
         return redirect(url_for('dashboard'))
 
-    return render_template('perfil.html', usuario=usuario)
+    return render_template('perfil.html', usuario=usuario, desativar_conta_form=desativar_conta_form)
 
 
-@usuarios_bp.route('/alterar-senha')
+
+@usuarios_bp.route('/alterar-senha', methods=['POST'])
 @login_required
 def alterar_senha():
-    pass
+    try:
+        # Pegando dados do form
+        senha_atual = request.form.get('senha_atual')
+        nova_senha = request.form.get('nova_senha')
+        confirmar_senha = request.form.get('confirmar_senha')
 
+        if not senha_atual or not nova_senha or not confirmar_senha:
+            flash('Preencha todos os campos', 'warning')
+            return redirect(url_for('usuarios.perfil'))
+
+        if nova_senha != confirmar_senha:
+            flash('As novas senhas não coincidem', 'warning')
+            return redirect(url_for('usuarios.perfil'))
+
+        if len(nova_senha) < 8:
+            flash('A sua senha deve conter 8 caracteres ou mais!', 'warning')
+            return redirect(url_for('usuarios.perfil'))
+
+        with get_session() as db:
+            usuario = db.query(Usuario).filter_by(id=session.get('user_id')).first()
+
+            if not usuario:
+                flash('Usuário não encontrado', 'warning')
+                return redirect(url_for('usuarios.perfil'))
+
+            # Verifica se a senha atual está correta
+            if not check_password_hash(usuario.senha, senha_atual):
+                flash('Senha atual incorreta', 'danger')
+                return redirect(url_for('usuarios.perfil'))
+
+            if not usuario.email_confirmado:
+                flash('Ação não permitida, faça a verificação do seu email primeiro!', 'warning')
+                return redirect(url_for('usuarios.perfil'))
+
+            # Atualiza a senha
+            usuario.senha = generate_password_hash(nova_senha)
+    except Exception as e:
+        print(e)
+        flash('Erro ao alterar senha', 'danger')
+        return redirect(url_for('usuarios.perfil'))
+
+    flash('Senha alterada com sucesso!', 'success')
+    return redirect(url_for('usuarios.perfil'))
+
+
+@usuarios_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    email = request.form.get('email')
+    if not email:
+        flash('Insira um email!', 'danger')
+        return redirect(url_for('usuarios.login'))
+    
+    try:
+        with get_session() as db:
+            user = db.query(Usuario).filter_by(email=email).first()
+            if not user:
+                flash('Email não encontrado, verifique e tente novamente!', 'danger')
+                return redirect(url_for('usuarios.login'))
+
+        token = generate_reset_token(email)
+        reset_link = url_for('usuarios.reset_password', token=token, _external=True)
+
+        email = resend.Emails.send({
+            "from": "admin <onboarding@resend.dev>",
+            "to": [email],
+            "subject": "Alterar senha",
+            "html": f'<p>Você está recebendo está mensagem pois foi feito um pedido para alterar a senha da sua conta.<br><br>Se não foi você que fez o pedido, ignore essa mensagem.<br><br>Link para alteração: {reset_link}</p>'
+        })
+
+        flash('O link para a alteração de sua senha foi mandado, cheque seu email', 'success')
+    except Exception as e:
+        flash('Erro ao enviar email! Tente novamente', 'danger')
+        print(e)
+
+    return redirect(url_for('usuarios.login'))
+
+
+@usuarios_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    email = verify_reset_token(token)
+    if not email:
+        flash('Token invalido ou expirado!', 'danger')
+        return redirect(url_for('usuarios.login'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if new_password != confirm_password:
+            flash('As senhas devem ser identicas', 'danger')
+            return redirect(url_for('usuarios.reset_password', token=token))
+
+        hash_password = generate_password_hash(new_password)
+
+        try:
+            with get_session() as db:
+                user = db.query(Usuario).filter_by(email=email).first()
+                if not user:
+                    flash('Email não encontrado, verifique e tente novamente!', 'danger')
+                    return redirect(url_for('usuarios.login'))
+                
+                user.senha = hash_password
+                user.email_confirmado = True
+                flash('Senha alterada com sucesso!', 'success')
+                return redirect(url_for('usuarios.login'))
+        except Exception as e:
+            flash('Erro ao alterar senha!', 'danger')
+            print(e)
+            return redirect(url_for('usuarios.login')) 
+    return render_template('reset_password.html', token=token)
 
 
 @usuarios_bp.route('/perfil-img')
@@ -216,10 +354,15 @@ def editar_usuario():
             if not usuario:
                 flash('Usuário não encontrado', 'warning')
                 return redirect(url_for('usuarios.perfil'))
-                    
-            u = db.query(Usuario).filter_by(email=email).first()
-            if u:
-                flash('O email inserido já pertence a outro usuário', 'warning')
+
+            if email != usuario.email:    
+                u = db.query(Usuario).filter_by(email=email).first()
+                if u:
+                    flash('O email inserido já pertence a outro usuário', 'warning')
+                    return redirect(url_for('usuarios.perfil'))
+            
+            if not usuario.email_confirmado:
+                flash('Faça a verificação do email para alteração de dados pessoais', 'warning')
                 return redirect(url_for('usuarios.perfil'))
 
             # Atualizando apenas se veio valor
@@ -229,10 +372,15 @@ def editar_usuario():
                 usuario.email = email
             if data_nascimento:
                 usuario.data_nascimento = data_nascimento
-
-            db.commit()
-
-
+            nome = ''
+            sobrenome = ''
+            for i, letra in enumerate(usuario.nome):
+                if letra == ' ':
+                    sobrenome = usuario.nome[i:]
+                    break
+                nome += letra
+            session['nome'] = nome
+            session['sobrenome'] = sobrenome
     except Exception as e:
         print(e)
         flash('Erro ao atualizar usuário', 'danger')
@@ -240,3 +388,98 @@ def editar_usuario():
     
     flash('Usuário atualizado com sucesso!', 'success')
     return redirect(url_for('usuarios.perfil'))
+
+
+@usuarios_bp.route('/desativar-conta', methods=['POST'])
+@login_required
+def desativar_conta():
+    form = DesativarContaForm()
+    if not form.validate_on_submit():
+        flash('Insira dados válidos!', 'danger')
+        return redirect(url_for('usuarios.perfil'))
+    
+    senha = form.senha.data
+
+    try:
+        with get_session() as db:
+            user = db.query(Usuario).filter_by(id=session.get('user_id')).first()
+            if not user:
+                flash('Usuário não encontrado', 'warning')
+                return redirect(url_for('usuarios.perfil'))
+            
+            if not check_password_hash(user.senha, senha):
+                flash('Senha incorreta.', 'danger')
+                return redirect(url_for('usuarios.perfil'))
+
+            user.ativo = False
+    except Exception as e:
+        print(e)
+        flash('Erro ao processar a desativação!', 'danger')
+        return redirect(url_for('usuarios.perfil'))
+    
+    flash('Conta desativada com sucesso.', 'success')
+    return redirect(url_for('usuarios.logout'))
+
+
+@usuarios_bp.route('/send-verification-email', methods=['POST'])
+@login_required
+def send_verification_email():
+
+    try:
+        with get_session() as db:
+            user = db.query(Usuario).filter_by(id=session.get('user_id')).first()
+            if not user:
+                flash('Usuário não encontrado!', 'danger')
+                return redirect(url_for('usuarios.login'))
+            
+        token = generate_email_verification_token(user.email)
+        verify_link = url_for('usuarios.verify_email', token=token, _external=True)
+
+        resend.Emails.send({
+            "from": "admin <onboarding@resend.dev>",
+            "to": [user.email],
+            "subject": "Verifique seu email",
+            "html": f'''
+                <p>Obrigado por se cadastrar!<br><br>
+                Clique no link abaixo para verificar sua conta:<br><br>
+                <a href="{verify_link}">Verificar Email</a><br><br>
+                Se você não criou esta conta, ignore este email.</p>
+            '''
+        })
+
+        flash('Email de verificação enviado!', 'success')
+    except Exception as e:
+        flash('Erro ao enviar email!', 'danger')
+        print(e)
+
+    return redirect(url_for('usuarios.perfil'))
+
+
+@usuarios_bp.route('/verify-email/<token>')
+def verify_email(token):
+    email = verify_email_verification_token(token)
+
+    if not email:
+        flash('Token inválido ou expirado!', 'danger')
+        return redirect(url_for('usuarios.login'))
+
+    try:
+        with get_session() as db:
+            user = db.query(Usuario).filter_by(email=email).first()
+
+            if not user:
+                flash('Usuário não encontrado!', 'danger')
+                return redirect(url_for('usuarios.login'))
+
+            if user.email_confirmado:
+                flash('Email já foi verificado anteriormente!', 'info')
+                return redirect(url_for('usuarios.login'))
+
+            user.email_confirmado = True
+
+        return render_template('email_verificado.html')
+
+    except Exception as e:
+        flash('Erro ao verificar email!', 'danger')
+        print(e)
+        return redirect(url_for('usuarios.login'))
