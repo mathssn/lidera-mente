@@ -19,7 +19,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
 
-UPLOAD_FOLDER = os.path.join(os.path.abspath(os.curdir), 'uploads')
+UPLOAD_FOLDER = os.path.join(os.path.abspath(os.curdir), 'tmp','uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 IMAGE_FOLDER = os.path.join(UPLOAD_FOLDER, 'images')
