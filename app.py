@@ -64,4 +64,4 @@ if __name__ == '__main__':
     app.register_blueprint(emocao_bp)
     app.register_blueprint(feedbacks_bp)
     app.register_blueprint(conteudos_bp)
-    app.run(debug=True)
+    app.run()
