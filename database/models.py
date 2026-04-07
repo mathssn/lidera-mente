@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean, ForeignKey, LargeBinary
+from sqlalchemy.dialects.mysql import MEDIUMBLOB
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -14,6 +15,8 @@ class Usuario(Base):
     senha = Column(String(255), nullable=False)
     ativo = Column(Boolean, nullable=False, default=True)
     email_confirmado = Column(Boolean, nullable=False, default=False)
+    avatar = Column(LargeBinary, nullable=True)
+    avatar_mimetype = Column(String(50), nullable=True)
     
 
 class Evento(Base):
@@ -58,3 +61,5 @@ class Conteudo(Base):
     assunto = Column(String(100))
     tipo = Column(String(100), nullable=False)
     link = Column(String(400))
+    img = Column(MEDIUMBLOB, nullable=True)
+    img_mimetype = Column(String(50), nullable=True)

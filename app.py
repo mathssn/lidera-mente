@@ -19,14 +19,6 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
 
-UPLOAD_FOLDER = os.path.join(os.path.abspath(os.curdir), 'tmp','uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-IMAGE_FOLDER = os.path.join(UPLOAD_FOLDER, 'images')
-os.makedirs(IMAGE_FOLDER, exist_ok=True)
-IMG_PERFIL_FOLDER = os.path.join(UPLOAD_FOLDER, 'img-perfil')
-os.makedirs(IMG_PERFIL_FOLDER, exist_ok=True)
-
 @app.route('/')
 def index():
     if 'user_id' in session:

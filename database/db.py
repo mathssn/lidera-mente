@@ -5,9 +5,16 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-db_name = os.environ.get('DB_NAME', 'database.db')
+db_name = os.environ.get('DB_NAME')
+username = os.environ.get('DB_USERNAME')
+password = os.environ.get('DB_PASSWORD')
 
-db = create_engine(f"sqlite:///{db_name}.db")
+db = create_engine(f"mysql+mysqlconnector://{username}:{password}@localhost:3306")
+
+with db.connect() as conn:
+    conn.execute(text(f"CREATE DATABASE IF NOT EXISTS {db_name}"))
+
+db = create_engine(f"mysql+mysqlconnector://{username}:{password}@localhost:3306/{db_name}", pool_pre_ping=True, pool_recycle=1800)
 Session = sessionmaker(bind=db, expire_on_commit=False)
 
 

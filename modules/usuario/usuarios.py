@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, abort, send_from_directory, jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, current_app, abort, Response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from itsdangerous import URLSafeTimedSerializer
+from PIL import Image
 import os
 import resend
-import glob
+import io
 
 from database.models import Usuario
 from database.db import get_session
@@ -261,19 +262,17 @@ def reset_password(token):
 @usuarios_bp.route('/perfil-img')
 @login_required
 def perfil_img():
-    pasta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'img-perfil')
-    
-    padrao = os.path.join(pasta, f"{session.get('user_id')}.*")
-    arquivos = glob.glob(padrao)
+    try:
+        with get_session() as session_db:
+            usuario = session_db.query(Usuario).filter_by(id=session.get('user_id')).first()
 
-    if not arquivos:
+            if not usuario or not usuario.avatar:
+                abort(404)
+
+            return Response(usuario.avatar, mimetype=usuario.avatar_mimetype)
+    except Exception as e:
+        print(e)
         abort(404)
-
-    # Pega o primeiro arquivo encontrado
-    caminho_arquivo = arquivos[0]
-    nome_arquivo = os.path.basename(caminho_arquivo)
-
-    return send_from_directory(pasta, nome_arquivo)
 
 
 @usuarios_bp.route('/salvar-img', methods=['POST'])
@@ -284,30 +283,46 @@ def salvar_img():
     if not file or file.filename == "":
         flash('Selecione um arquivo', 'warning')
         return jsonify({'sucesso': False})
-    
+
+    MAX_SIZE = 2 * 1024 * 1024  # 2MB
+    file.seek(0, os.SEEK_END)
+    tamanho = file.tell()
+    file.seek(0)
+
+    if tamanho > MAX_SIZE:
+        flash('Imagem muito grande (máx: 2MB)', 'warning')
+        return jsonify({'sucesso': False})
+
     try:
+        image = Image.open(file)
+
+        if image.format not in ['JPEG', 'JPG', 'PNG', 'WEBP']:
+            flash('Formato inválido. Use JPG, PNG ou WEBP.', 'warning')
+            return jsonify({'sucesso': False})
+
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
+
+        image.thumbnail((300, 300))
+
+        img_io = io.BytesIO()
+
+        image.save(img_io, format='JPEG', quality=85, optimize=True)
+        img_io.seek(0)
+
         with get_session() as session_db:
             usuario = session_db.query(Usuario).filter_by(id=session.get('user_id')).first()
-            if not usuario:
-                flash('Não foi possivel identificar o usuário logado!', 'danger')
-                return redirect(url_for('dashboard'))
-            
-            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'img-perfil')
-            os.makedirs(upload_path, exist_ok=True)
 
-            files = os.listdir(upload_path)
-            for f in files:
-                name, ext = os.path.splitext(f)
-                if name == str(usuario.id):
-                    os.remove(os.path.join(upload_path, f))
-            
-            # O nome do arquivo será de acordo com o id da nota
-            _, ext = os.path.splitext(file.filename)
-            filepath = os.path.join(upload_path, str(usuario.id) + ext)
-            file.save(filepath)
+            if not usuario:
+                flash('Não foi possível identificar o usuário!', 'danger')
+                return jsonify({'sucesso': False})
+
+            usuario.avatar = img_io.read()
+            usuario.avatar_mimetype = 'image/jpeg'  # padronizado
+
     except Exception as e:
-        flash('Erro ao fazer upload da imagem!', 'danger')
         print(e)
+        flash('Erro ao processar a imagem!', 'danger')
         return jsonify({'sucesso': False})
 
     return jsonify({'sucesso': True})
@@ -323,16 +338,12 @@ def remover_img():
                 flash('Não foi possivel identificar o usuário logado!', 'danger')
                 return redirect(url_for('dashboard'))
             
-            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'img-perfil')
-            files = os.listdir(upload_path)
-            for f in files:
-                name, ext = os.path.splitext(f)
-                if name == str(usuario.id):
-                    os.remove(os.path.join(upload_path, f))       
+            usuario.avatar = None
+            usuario.avatar_mimetype = None
     except Exception as e:
         flash('Erro ao deletar a imagem!', 'danger')
         print(e)
-        return jsonify({'sucesso': False})
+        return redirect(url_for('usuarios.perfil'))
 
     flash('Imagem removida!', 'success')
     return redirect(url_for('usuarios.perfil'))

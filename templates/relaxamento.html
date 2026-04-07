@@ -58,7 +58,7 @@
       <div class="card h-100 shadow-sm conteudo-card" style="border-radius: 15px; overflow: hidden;">
 
         <!-- IMAGEM -->
-        <img src="{{ url_for('conteudos.carregar_imagem', id=conteudo.id) }}"
+        <img src="{{ url_for('conteudos.carregar_imagem', conteudo_id=conteudo.id) }}"
              class="card-img-top"
              style="height: 180px; object-fit: cover;"
              onerror="this.style.display='none'; document.getElementById('placeholder-{{conteudo.id}}').style.display='flex';"

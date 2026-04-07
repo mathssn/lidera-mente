@@ -1,7 +1,6 @@
-from flask import Blueprint, session, redirect, flash, render_template, url_for, jsonify, request, send_from_directory, abort, current_app
-from datetime import datetime
-import os
-import glob
+from flask import Blueprint, session, redirect, flash, render_template, url_for, jsonify, request, abort, Response
+from PIL import Image
+import io
 
 from modules.utils import login_required
 from database.db import get_session
@@ -43,21 +42,19 @@ def conteudos():
     return render_template('conteudos.html', conteudos=conteudos_, form=form, form_ed=form_ed)
 
 
-@conteudos_bp.route('/imagem/<int:id>')
-def carregar_imagem(id):
-    pasta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'images')
-    
-    padrao = os.path.join(pasta, f"{id}.*")
-    arquivos = glob.glob(padrao)
+@conteudos_bp.route('/imagem/<int:conteudo_id>')
+def carregar_imagem(conteudo_id):
+    try:
+        with get_session() as session_db:
+            conteudo = session_db.query(Conteudo).filter_by(id=conteudo_id).first()
 
-    if not arquivos:
+            if not conteudo or not conteudo.img:
+                abort(404)
+
+            return Response(conteudo.img, mimetype=conteudo.img_mimetype)
+    except Exception as e:
+        print(e)
         abort(404)
-
-    # Pega o primeiro arquivo encontrado
-    caminho_arquivo = arquivos[0]
-    nome_arquivo = os.path.basename(caminho_arquivo)
-
-    return send_from_directory(pasta, nome_arquivo)
 
 
 @conteudos_bp.route('/upload-imagem/<int:conteudo_id>', methods=['POST'])
@@ -73,8 +70,21 @@ def upload_imagem(conteudo_id):
         return redirect(url_for('dashboard'))
 
     try:
-        with get_session() as session_db:
+        image = Image.open(file)
 
+        if image.format not in ['JPEG', 'JPG', 'PNG', 'WEBP']:
+            flash('Formato inválido. Use JPG, PNG ou WEBP.', 'warning')
+            return jsonify({'sucesso': False})
+        
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
+
+        img_io = io.BytesIO()
+
+        image.save(img_io, format='JPEG', quality=100, optimize=True)
+        img_io.seek(0)
+
+        with get_session() as session_db:
             conteudo = session_db.query(Conteudo).filter_by(id=conteudo_id).first()
 
             if not conteudo:
@@ -82,19 +92,8 @@ def upload_imagem(conteudo_id):
                 return redirect(url_for('dashboard'))
             tipo = conteudo.tipo
 
-            upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'images')
-            os.makedirs(upload_path, exist_ok=True)
-
-            for f in os.listdir(upload_path):
-                name, ext = os.path.splitext(f)
-                if name == str(conteudo.id):
-                    os.remove(os.path.join(upload_path, f))
-
-            _, ext = os.path.splitext(file.filename)
-            filename = f"{conteudo.id}{ext}"
-            filepath = os.path.join(upload_path, filename)
-
-            file.save(filepath)
+            conteudo.img = img_io.read()
+            conteudo.img_mimetype = 'image/jpeg'
 
     except Exception as e:
         print(e)
