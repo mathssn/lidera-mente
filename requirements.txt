@@ -2,7 +2,6 @@ blinker==1.9.0
 certifi==2026.2.25
 charset-normalizer==3.4.6
 click==8.3.1
-colorama==0.4.6
 dnspython==2.8.0
 dotenv==0.9.9
 email-validator==2.3.0
@@ -16,8 +15,9 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 mysql-connector-python==9.6.0
 packaging==26.0
+pillow==12.2.0
 python-dotenv==1.2.2
-requests==2.33.0
+requests==2.33.1
 resend==2.26.0
 SQLAlchemy==2.0.48
 typing_extensions==4.15.0

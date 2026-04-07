@@ -1,7 +1,8 @@
 from flask import Flask, render_template, session, redirect, flash
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from dotenv import load_dotenv
 import os
+import time
 
 from database.db import db, get_session
 from database.models import Base, Evento
@@ -49,11 +50,23 @@ def format_date(value, formato='%d/%m/%Y'):
         return value.strftime(formato)
     return value
 
-if __name__ == '__main__':
-    Base.metadata.create_all(bind=db)
-    app.register_blueprint(usuarios_bp)
-    app.register_blueprint(agenda_bp)
-    app.register_blueprint(emocao_bp)
-    app.register_blueprint(feedbacks_bp)
-    app.register_blueprint(conteudos_bp)
-    app.run()
+# Retry para esperar o banco subir
+for i in range(10):
+    try:
+        print(f"Tentando conectar ao banco... ({i+1}/10)")
+        Base.metadata.create_all(bind=db)
+        print("Conectado ao banco com sucesso!")
+        break
+    except Exception as e:
+        print("Erro ao conectar no banco:", e)
+        time.sleep(3)
+else:
+    print("Não foi possível conectar ao banco.")
+    exit(1)
+
+Base.metadata.create_all(bind=db)
+app.register_blueprint(usuarios_bp)
+app.register_blueprint(agenda_bp)
+app.register_blueprint(emocao_bp)
+app.register_blueprint(feedbacks_bp)
+app.register_blueprint(conteudos_bp)
