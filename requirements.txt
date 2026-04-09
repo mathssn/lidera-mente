@@ -16,6 +16,8 @@ MarkupSafe==3.0.3
 mysql-connector-python==9.6.0
 packaging==26.0
 pillow==12.2.0
+psycopg2-binary==2.9.11
+PyMySQL==1.1.2
 python-dotenv==1.2.2
 requests==2.33.1
 resend==2.26.0
