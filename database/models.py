@@ -61,7 +61,7 @@ class Conteudo(Base):
     assunto = Column(String(100))
     tipo = Column(String(100), nullable=False)
     link = Column(String(400))
-    img = Column(MEDIUMBLOB, nullable=True)
+    img = Column(LargeBinary, nullable=True)
     img_mimetype = Column(String(50), nullable=True)
 
 class Cor(Base):
