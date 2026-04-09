@@ -64,7 +64,6 @@ else:
     print("Não foi possível conectar ao banco.")
     exit(1)
 
-Base.metadata.create_all(bind=db)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(agenda_bp)
 app.register_blueprint(emocao_bp)

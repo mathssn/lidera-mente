@@ -210,7 +210,7 @@ def forgot_password():
         reset_link = url_for('usuarios.reset_password', token=token, _external=True)
 
         email = resend.Emails.send({
-            "from": "admin <onboarding@resend.dev>",
+            "from": "LideraMente <contato@lideramente.net>",
             "to": [email],
             "subject": "Alterar senha",
             "html": f'<p>Você está recebendo está mensagem pois foi feito um pedido para alterar a senha da sua conta.<br><br>Se não foi você que fez o pedido, ignore essa mensagem.<br><br>Link para alteração: {reset_link}</p>'
@@ -447,7 +447,7 @@ def send_verification_email():
         verify_link = url_for('usuarios.verify_email', token=token, _external=True)
 
         resend.Emails.send({
-            "from": "admin <onboarding@resend.dev>",
+            "from": "LideraMente <contato@lideramente.net>",
             "to": [user.email],
             "subject": "Verifique seu email",
             "html": f'''
@@ -460,7 +460,7 @@ def send_verification_email():
 
         flash('Email de verificação enviado!', 'success')
     except Exception as e:
-        flash('Erro ao enviar email!', 'danger')
+        flash('Erro ao enviar email!1', 'danger')
         print(e)
 
     return redirect(url_for('usuarios.perfil'))

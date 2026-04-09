@@ -63,3 +63,10 @@ class Conteudo(Base):
     link = Column(String(400))
     img = Column(MEDIUMBLOB, nullable=True)
     img_mimetype = Column(String(50), nullable=True)
+
+class Cor(Base):
+    __tablename__ = 'cor'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    hex = Column(String(30), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)

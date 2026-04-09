@@ -10,7 +10,12 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     default-libmysqlclient-dev \
-    && apt-get clean
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# (Opcional, mas bom garantir)
+RUN update-ca-certificates
 
 # Copiar dependências
 COPY requirements.txt .
