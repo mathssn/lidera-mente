@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block titulo_nav %}
-Agenda
-{% endblock %}
-
 {% block content %}
 
 {% set cores = [
-'#D29BF4', '#C88FF0', '#BE83EB', '#B478E6', '#AA6DE1', '#DDB8F7',
-'#EFD5FF', '#F3DEFF', '#E8C7FA', '#F6E8FF', '#EAD2F9', '#F9F0FF',
-'#FAFFCC', '#F7FFC0', '#F4FFB3', '#FFFACD', '#FFF7B8', '#FFFDE0',
-'#E9F48C', '#E2EF7A', '#DBEA68', '#F1F8B0', '#EAF59E', '#F6FFD6'
+'#FF6B6B', '#FF8E72', '#FFA07A', '#FFB347', '#FFD166', '#FFE066',
+'#FAF089', '#E6FF8A', '#C1FF72', '#9BE564', '#6EEB83', '#4DD0E1',
+'#48CAE4', '#00B4D8', '#0096C7', '#0077B6', '#5E60CE', '#6930C3',
+'#7400B8', '#8E44AD', '#A569BD', '#BB8FCE', '#D2B4DE', '#E84393',
+'#FD79A8', '#FF7675', '#FAB1A0', '#FDCB6E', '#E17055', '#D63031',
+'#E67E22', '#F39C12', '#F1C40F', '#2ECC71', '#27AE60', '#1ABC9C',
+'#16A085', '#3498DB', '#2980B9', '#9B59B6', '#8E44AD', '#6C5CE7',
+'#00CEC9', '#55EFC4', '#81ECEC', '#74B9FF', '#A29BFE', '#FF9FF3'
 ] %}
 
 <div class="container py-4">
@@ -57,13 +57,6 @@ Agenda
 
 </div>
 
-<!-- FLOATING BUTTON (mobile style) -->
-<button class="btn shadow"
-        style="position: fixed; bottom: 20px; right: 20px; background-color: #D29BF4; color: white; border-radius: 50%; width: 60px; height: 60px;"
-        data-bs-toggle="modal"
-        data-bs-target="#cadastrarEventoModal">
-  <i class="bi bi-plus fs-3"></i>
-</button>
 
 <style>
 .calendario-table td {
@@ -122,7 +115,7 @@ Agenda
             
             <div class="mb-3">
                 {{ form.data_hora.label }}
-                {{ form.data_hora(class='form-control', type='datetime-local') }}
+                {{ form.data_hora(class='form-control', type='datetime-local', id='data_hora') }}
             </div>
 
             <div class="mb-3">

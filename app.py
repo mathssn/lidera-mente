@@ -44,6 +44,10 @@ def dashboard():
 
     return render_template('dashboard.html', eventos=eventos)
 
+@app.route('/sobre')
+def sobre():
+    return render_template('sobre.html')
+
 @app.template_filter('format_date')
 def format_date(value, formato='%d/%m/%Y'):
     if isinstance(value, date):
@@ -69,3 +73,5 @@ app.register_blueprint(agenda_bp)
 app.register_blueprint(emocao_bp)
 app.register_blueprint(feedbacks_bp)
 app.register_blueprint(conteudos_bp)
+if __name__ == '__main__':
+    app.run(debug=True, port=4000)

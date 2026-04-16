@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- HERO SOBRE -->
+<div class="container py-5">
+  <div class="row align-items-center">
+
+    <div class="col-md-7">
+      <h1 class="fw-bold" style="color: #D29BF4;">
+        Quem está por trás do LideraMente?
+      </h1>
+      <p class="mt-3 fs-5">
+        Somos estudantes do curso <strong>Técnico em Administração do Senac</strong>, 
+        unidade Crato – Ceará, turma 2024.09.55, e desenvolvemos o 
+        <strong>LideraMente</strong>, uma plataforma digital voltada ao apoio à saúde mental 
+        de líderes formais e informais.
+      </p>
+    </div>
+
+    <div class="col-md-5 text-center">
+      <img src="{{ url_for('static', filename='images/logo.jpeg') }}"
+           class="img-fluid"
+           style="max-width: 350px; border-radius: 15px;">
+    </div>
+
+  </div>
+</div>
+
+<!-- ORIGEM DO PROJETO -->
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Como surgiu o projeto?</h2>
+    <p class="text-muted">
+      Uma resposta concreta a um problema real enfrentado por líderes no dia a dia.
+    </p>
+  </div>
+
+  <div class="row g-4">
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body">
+          <i class="bi bi-search fs-1 icone-roxo"></i>
+          <h5 class="mt-3">O Problema Identificado</h5>
+          <p class="text-muted">
+            Líderes enfrentam altos níveis de pressão, acúmulo de responsabilidades e, 
+            muitas vezes, falta de preparo emocional para lidar com suas demandas e equipes.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body">
+          <i class="bi bi-lightbulb fs-1 icone-roxo"></i>
+          <h5 class="mt-3">A Nossa Proposta</h5>
+          <p class="text-muted">
+            Uma plataforma funcional, intuitiva e acolhedora que integra organização 
+            profissional, autoconhecimento emocional e acesso a apoio psicológico.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body">
+          <i class="bi bi-bullseye fs-1 icone-roxo"></i>
+          <h5 class="mt-3">Nosso Objetivo</h5>
+          <p class="text-muted">
+            Reduzir a sobrecarga mental, promover o equilíbrio emocional e contribuir 
+            para a formação de lideranças mais conscientes, humanas e preparadas.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- IMPACTO -->
+<div class="container py-5">
+  <div class="p-5 rounded shadow-sm" style="background-color: #F3E8FD;">
+    <div class="row align-items-center">
+      <div class="col-md-2 text-center mb-3 mb-md-0">
+        <i class="bi bi-heart-pulse fs-1 icone-roxo"></i>
+      </div>
+      <div class="col-md-10">
+        <h4 class="fw-bold">Por que saúde mental de líderes importa?</h4>
+        <p class="mt-2 mb-0">
+          Acreditamos que cuidar da saúde mental dos líderes é essencial para transformar 
+          ambientes de trabalho, impactando diretamente na produtividade, no bem-estar das 
+          equipes e na construção de uma <strong>cultura organizacional mais saudável e sustentável</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTEGRANTES -->
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Integrantes do Projeto</h2>
+    <p class="text-muted">
+      Conheça a equipe que tornou o LideraMente possível.
+    </p>
+  </div>
+
+  <div class="row g-3 justify-content-center">
+
+    {% set integrantes = [
+      ("Alexandra Clarindo dos Santos Alves", "bi-person-circle"),
+      ("Ana Paula Silva de Lima", "bi-person-circle"),
+      ("Andressa de Sousa Brito", "bi-person-circle"),
+      ("Camily Vitória Bezerra Silva", "bi-person-circle"),
+      ("Edileide de Almeida Sousa", "bi-person-circle"),
+      ("Erlania Pereira da Silva", "bi-person-circle"),
+      ("Flaudilane Alves Pereira", "bi-person-circle"),
+      ("Joana Darc Coelho da Silva", "bi-person-circle"),
+      ("Lívia Maria Monteiro Nascimento", "bi-person-circle"),
+      ("Maria Franciele Lima Gomes", "bi-person-circle"),
+      ("Maria Neuzilene Taveira Silva", "bi-person-circle"),
+      ("Maria Sabrina Silva Sousa", "bi-person-circle"),
+      ("Marina da Silva Hermogens", "bi-person-circle"),
+      ("Paulo Wandson Ferreira da Silva", "bi-person-circle"),
+      ("Suiane Firmino de Sousa", "bi-person-circle"),
+      ("Tayara Felix de Lima", "bi-person-circle"),
+      ("Yhasmim Vitoria Vanderlei Dias", "bi-person-circle")
+    ] %}
+
+    {% for nome, icone in integrantes %}
+    <div class="col-md-3 col-sm-6">
+      <div class="card h-100 shadow-sm text-center" style="border-radius: 15px;">
+        <div class="card-body py-4">
+          <i class="bi {{ icone }} fs-2 icone-roxo"></i>
+          <p class="mt-2 mb-0 fw-semibold" style="font-size: 0.95rem;">{{ nome }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="container py-5 text-center">
+  <div class="p-5 rounded shadow-sm" style="background-color: #F3E8FD;">
+    <h3 class="fw-bold">Faça parte dessa transformação</h3>
+    <p class="mt-3">
+      Desenvolvido com dedicação por estudantes que acreditam no poder da liderança consciente.
+    </p>
+
+    {% if 'user_id' not in session %}
+    <a href="/cadastro" class="btn btn-lg mt-3 botao-roxo">
+      Criar minha conta gratuita
+    </a>
+    {% else %}
+    <a href="/dashboard" class="btn btn-lg mt-3 botao-roxo">
+      Acessar minha área
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

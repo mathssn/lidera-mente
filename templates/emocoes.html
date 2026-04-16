@@ -1,9 +1,5 @@
 {% extends "base.html" %}
 
-{% block titulo_nav %}
-Diário de emoções
-{% endblock %}
-
 {% block content %}
 
 <div class="container py-4">
@@ -56,16 +52,16 @@ Diário de emoções
           <div style="flex: 1;">
 
             <h5 class="fw-bold mb-1">
-              {{ emocoes_dict[emocao.humor] }}
+              {{ emocao.get('emoji') }} {{ emocao.get('humor') }}
             </h5>
 
             <small class="text-muted">
               <i class="bi bi-calendar"></i>
-              {{ emocao.data | format_date }}
+              {{ emocao.get('data') | format_date }}
             </small>
 
             <p class="mt-2 mb-0">
-              {{ emocao.descricao }}
+              {{ emocao.get('descricao') }}
             </p>
 
           </div>
@@ -77,11 +73,11 @@ Diário de emoções
               class="btn btn-sm btn-outline-primary"
               data-bs-toggle="modal"
               data-bs-target="#editEmocaoModal"
-              onclick="fillEmocaoEditForm('{{ emocao.id }}', '{{ emocao.humor }}', '{{ emocao.descricao | escape }}', '{{ emocao.data }}')">
+              onclick="fillEmocaoEditForm('{{ emocao.get("id") }}', '{{ emocao.get("humor") }}', '{{ emocao.get("emoji") }}', '{{ emocao.get("descricao") | escape }}', '{{ emocao.get("data") }}')">
               <i class="bi bi-pencil"></i>
             </button>
 
-            <form action="{{ url_for('emocao.excluir_emocao', emocao_id=emocao.id) }}"
+            <form action="{{ url_for('emocao.excluir_emocao', emocao_id=emocao.get('id')) }}"
                   method="POST"
                   onsubmit="return confirm('Tem certeza que deseja excluir este item?')">
               <button class="btn btn-sm btn-outline-danger" type="submit">
@@ -154,12 +150,18 @@ Diário de emoções
         <h1 class="modal-title fs-5" id="cadastrarEmocaoModalLabel">Adicionar uma nova emoção</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
       <div class="modal-body">
           {{ form.hidden_tag() }}
             
             <div class="mb-3">
                 {{ form.humor.label }}
-                {{ form.humor(class='form-select') }}
+                {{ form.humor(class='form-control', placeholder='Ex: feliz, ansioso...') }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.emoji.label }}
+                {{ form.emoji(class='form-select') }}
             </div>
             
             <div class="mb-3">
@@ -172,15 +174,16 @@ Diário de emoções
                 {{ form.data_field(class='form-control', type='date') }}
             </div>
 
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            {{ form.submit(class='btn btn-primary') }}
-        </div>
-        </form>
       </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        {{ form.submit(class='btn btn-primary') }}
+      </div>
+    </form>
     </div>
   </div>
+</div>
 
 
 <div class="modal fade" id="editEmocaoModal" tabindex="-1" aria-labelledby="editEmocaoModalLabel" aria-hidden="true">
@@ -191,12 +194,18 @@ Diário de emoções
         <h1 class="modal-title fs-5" id="editEmocaoModalLabel">Editar</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
       <div class="modal-body">
           {{ form_ed.hidden_tag() }}
             
             <div class="mb-3">
                 {{ form_ed.humor.label }}
-                {{ form_ed.humor(class='form-select', id='edit_humor') }}
+                {{ form_ed.humor(class='form-control', id='edit_humor') }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_ed.emoji.label }}
+                {{ form_ed.emoji(class='form-select', id='edit_emoji') }}
             </div>
             
             <div class="mb-3">
@@ -209,20 +218,22 @@ Diário de emoções
                 {{ form_ed.data_field(class='form-control', type='date', id='edit_data') }}
             </div>
 
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            {{ form_ed.submit(class='btn btn-primary') }}
-        </div>
-        </form>
       </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        {{ form_ed.submit(class='btn btn-primary') }}
+      </div>
+    </form>
     </div>
   </div>
+</div>
 
 
 <script>
-    function fillEmocaoEditForm(id, humor, descricao, data) {
+    function fillEmocaoEditForm(id, humor, emoji, descricao, data) {
         document.getElementById("edit_humor").value = humor;
+        document.getElementById("edit_emoji").value = emoji;
         document.getElementById("edit_descricao").value = descricao;
         document.getElementById("edit_data").value = data;
 

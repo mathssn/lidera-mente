@@ -10,6 +10,15 @@ export function fillEventModal(data, eventosPorData, dataCompleta) {
 
     if (!eventosPorData[data]) {
         divEventos.innerHTML = "<p>Nenhum evento neste dia</p>"
+        const b = document.createElement("button")
+        b.classList.add("btn", "btn-primary")
+        b.innerText = "Adicionar um evento a esse dia"
+        b.type = "button"
+        b.setAttribute("data-bs-dismiss", "modal")
+        b.setAttribute("data-bs-toggle", "modal")
+        b.setAttribute("data-bs-target", "#cadastrarEventoModal")
+        document.getElementById("data_hora").value = data + "T00:00"
+        divEventos.appendChild(b)
         return
     }
 
@@ -27,17 +36,23 @@ export function fillEventModal(data, eventosPorData, dataCompleta) {
 function createListItemEvent(lista, evento) {
     const li = document.createElement("li")
     li.classList.add("list-group-item")
-    li.classList.add("d-flex")
-    li.classList.add("justify-content-between")
-    li.classList.add("align-items-center")
 
-    const div = document.createElement("div")
-    div.classList.add("form-check")
+    const container = document.createElement("div")
+    container.classList.add("d-flex", "flex-column")
+
+    // ===== Linha de cima =====
+    const topRow = document.createElement("div")
+    topRow.classList.add("d-flex", "justify-content-between", "align-items-center")
+
+    const leftSide = document.createElement("div")
+    leftSide.classList.add("form-check")
 
     const input = document.createElement("input")
-    const label = document.createElement("label")
     input.type = "checkbox"
     input.classList.add("form-check-input")
+
+    const label = document.createElement("label")
+    label.classList.add("form-check-label")
 
     if (evento.completado) {
         input.checked = true
@@ -49,15 +64,33 @@ function createListItemEvent(lista, evento) {
         checkEvent(evento.id, evento)
     })
 
-    div.appendChild(input)
+    const hora = evento.data_hora.split("T")[1].slice(0, 5)
+    label.textContent = `${evento.titulo} às ${hora}`
 
-    label.textContent = evento.titulo + " as " + evento.data_hora.split("T")[1].slice(0, 5)
-    label.classList.add("form-check-label")
+    leftSide.appendChild(input)
+    leftSide.appendChild(label)
 
-    div.appendChild(label)
-    li.appendChild(div)
-    createButtons(li, evento)
+    topRow.appendChild(leftSide)
 
+    // botões continuam na direita
+    createButtons(topRow, evento)
+
+    // ===== Descrição (linha de baixo) =====
+    const descricao = document.createElement("small")
+    descricao.classList.add("text-muted", "ms-4")
+
+    let descricaoCurta = evento.descricao || ""
+    if (descricaoCurta.length > 50) {
+        descricaoCurta = descricaoCurta.slice(0, 50) + "..."
+    }
+
+    descricao.textContent = descricaoCurta
+
+    // ===== Montagem =====
+    container.appendChild(topRow)
+    container.appendChild(descricao)
+
+    li.appendChild(container)
     lista.appendChild(li)
 }
 

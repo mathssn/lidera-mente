@@ -8,8 +8,6 @@ from modules.emocoes.forms import EmocaoForm
 
 emocao_bp = Blueprint('emocao', __name__, template_folder='templates')
 
-emocoes_dict = {'feliz': '😃 Feliz', 'triste': '😕 Triste', 'entediado': '😐 Entediado', 'raiva': '😡 Raiva'}
-
 @emocao_bp.route('/emocoes')
 @login_required
 def emocoes():
@@ -29,12 +27,27 @@ def emocoes():
             total_pages = (total + per_page - 1) // per_page
 
             emocoes_lista = emocoes_lista.offset(offset).limit(per_page).all()
+            ems = []
+            for e in emocoes_lista:
+                try:
+                    emoji, humor = e.humor.split('|', 1)
+                except:
+                    emoji = e.humor
+                    humor = e.humor
+                e_dict = {
+                    "id": e.id,
+                    "emoji": emoji,
+                    "humor": humor,
+                    "descricao": e.descricao,
+                    "data": e.data
+                }
+                ems.append(e_dict)
     except Exception as e:
         print(e)
         flash('Não foi possiveil carregar a pagina!', 'danger')
         return redirect(url_for('dashboard'))
     
-    return render_template('emocoes.html', emocoes=emocoes_lista, form=form, emocoes_dict=emocoes_dict, form_ed=form_ed, total_pages=total_pages, page=page)
+    return render_template('emocoes.html', emocoes=ems, form=form, form_ed=form_ed, total_pages=total_pages, page=page)
     
 
 @emocao_bp.route('/paginacao_em', methods=['POST'])
@@ -63,9 +76,12 @@ def cadastrar_emocao():
         return redirect(url_for('emocao.emocoes'))
 
     humor = form.humor.data
+    emoji = form.emoji.data
     descricao = form.descricao.data
     data = form.data_field.data
-    nova_emocao = Emocao(humor=humor, descricao=descricao, data=data, usuario_id=user_id)
+
+    humor_completo = f"{emoji}|{humor}"
+    nova_emocao = Emocao(humor=humor_completo, descricao=descricao, data=data, usuario_id=user_id)
 
     try:
         with get_session() as db:
@@ -99,7 +115,10 @@ def editar_emocao(emocao_id):
                 flash('Não é possivel alterar o registro!', 'warning')
                 return redirect(url_for('emocao.emocoes'))
             
-            emocao.humor = form.humor.data
+            humor = form.humor.data
+            emoji = form.emoji.data
+            humor_completo = f"{emoji}|{humor}"
+            emocao.humor = humor_completo
             emocao.descricao = form.descricao.data
             emocao.data = form.data_field.data
     except Exception as e:
