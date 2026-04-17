@@ -48,6 +48,10 @@ def dashboard():
 def sobre():
     return render_template('sobre.html')
 
+@app.route('/apoio')
+def apoio():
+    return render_template('apoio.html')
+
 @app.template_filter('format_date')
 def format_date(value, formato='%d/%m/%Y'):
     if isinstance(value, date):
