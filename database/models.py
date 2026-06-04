@@ -70,3 +70,14 @@ class Cor(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     hex = Column(String(30), nullable=False)
     usuario_id = Column(Integer, ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
+
+
+class Contato(Base):
+    __tablename__ = 'contato'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    titulo = Column(String(100), nullable=False)
+    descricao = Column(String(400))
+    link = Column(String(400))
+    img = Column(LargeBinary, nullable=True)
+    img_mimetype = Column(String(50), nullable=True)

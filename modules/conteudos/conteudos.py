@@ -74,8 +74,8 @@ def upload_imagem(conteudo_id):
 
         if image.format not in ['JPEG', 'JPG', 'PNG', 'WEBP']:
             flash('Formato inválido. Use JPG, PNG ou WEBP.', 'warning')
-            return jsonify({'sucesso': False})
-        
+            return redirect(url_for('dashboard'))
+
         if image.mode in ("RGBA", "P"):
             image = image.convert("RGB")
 

@@ -2,96 +2,276 @@
 
 {% block content %}
 
-
-
-<!-- APOIO -->
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+  {% set is_admin = session.get('email') == 'lidera.mente@gmail.com' %}
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h2 class="fw-bold mb-0">Apoio psicológico</h2>
-      <small class="text-muted">Você não precisa passar por isso sozinho.</small>
+      <h2 class="fw-bold mb-0">Apoio Psicológico</h2>
+      <small class="text-muted">
+        Você não precisa passar por isso sozinho.
+      </small>
+    </div>
+
+    {% if is_admin %}
+    <button class="btn botao-roxo d-flex align-items-center gap-2"
+            data-bs-toggle="modal"
+            data-bs-target="#cadastrarContatoModal">
+      <i class="bi bi-plus-lg"></i>
+      Adicionar
+    </button>
+    {% endif %}
+  </div>
+
+  <!-- LISTA -->
+  {% if contatos|length == 0 %}
+
+  <div class="card shadow-sm text-center p-4" style="border-radius: 15px;">
+    <div class="card-body">
+      <i class="bi bi-person-heart fs-1 text-muted"></i>
+
+      <p class="mt-3 mb-2">
+        Nenhum contato de apoio cadastrado.
+      </p>
+
+      {% if is_admin %}
+      <button class="btn botao-roxo mt-2"
+              data-bs-toggle="modal"
+              data-bs-target="#cadastrarContatoModal">
+        Adicionar contato
+      </button>
+      {% endif %}
     </div>
   </div>
+
+  {% else %}
 
   <div class="row g-4">
 
-    <!-- CVV -->
+    {% for contato in contatos %}
     <div class="col-md-4">
-      <div class="card h-100 shadow-sm" style="border-radius: 15px;">
-        <div class="card-body">
-          <h5 class="fw-bold">CVV - 188</h5>
-          <p class="text-muted">
-            Apoio emocional gratuito e prevenção ao suicídio, com escuta sigilosa e sem julgamentos.
-          </p>
-          <a href="https://cvv.org.br/" target="_blank" class="btn botao-roxo mt-2">
-            Acessar
-          </a>
-        </div>
-      </div>
-    </div>
 
-    <!-- Mapa Saúde Mental -->
-    <div class="col-md-4">
-      <div class="card h-100 shadow-sm" style="border-radius: 15px;">
-        <div class="card-body">
-          <h5 class="fw-bold">Mapa da Saúde Mental</h5>
-          <p class="text-muted">
-            Encontre locais com atendimento psicológico gratuito ou voluntário perto de você.
-          </p>
-          <a href="https://mapasaudemental.com.br/" target="_blank" class="btn botao-roxo mt-2">
-            Acessar
-          </a>
-        </div>
-      </div>
-    </div>
+      <div class="card h-100 shadow-sm contato-card"
+           style="border-radius:15px; overflow:hidden;">
 
-    <!-- Psicólogos Sem Fronteiras -->
-    <div class="col-md-4">
-      <div class="card h-100 shadow-sm" style="border-radius: 15px;">
-        <div class="card-body">
-          <h5 class="fw-bold">Psicólogos Sem Fronteiras</h5>
-          <p class="text-muted">
-            Rede de profissionais que oferecem suporte psicológico gratuito e humanitário.
-          </p>
-          <a href="https://www.psf.org.br/contato" target="_blank" class="btn botao-roxo mt-2">
-            Acessar
-          </a>
-        </div>
-      </div>
-    </div>
+        <!-- IMAGEM -->
+        <img src="{{ url_for('contato.contato_carregar_imagem', contato_id=contato.id) }}"
+             class="card-img-top"
+             style="height:180px; object-fit:cover;"
+             onerror="this.style.display='none'; document.getElementById('placeholder-{{contato.id}}').style.display='flex';"
+             {% if is_admin %}
+             onclick="document.getElementById('input-img-{{contato.id}}').click()"
+             {% endif %}
+        >
 
-    <!-- Projeto Por Mim -->
-    <div class="col-md-6">
-      <div class="card h-100 shadow-sm" style="border-radius: 15px;">
-        <div class="card-body">
-          <h5 class="fw-bold">Projeto Por Mim</h5>
-          <p class="text-muted">
-            Atendimento psicológico em um espaço seguro e acolhedor, focado no seu cuidado emocional.
-          </p>
-          <a href="https://projetopormim.com.br/#ajuda" target="_blank" class="btn botao-roxo mt-2">
-            Acessar
-          </a>
+        <!-- PLACEHOLDER -->
+        <div id="placeholder-{{contato.id}}"
+             class="align-items-center justify-content-center bg-light"
+             style="height:180px; display:none; cursor:pointer;"
+             {% if is_admin %}
+             onclick="document.getElementById('input-img-{{contato.id}}').click()"
+             {% endif %}
+        >
+          <i class="bi bi-image fs-1 text-muted"></i>
         </div>
-      </div>
-    </div>
 
-    <!-- CAPS -->
-    <div class="col-md-6">
-      <div class="card h-100 shadow-sm" style="border-radius: 15px;">
-        <div class="card-body">
-          <h5 class="fw-bold">CAPS - Centros de Atenção Psicossocial</h5>
-          <p class="text-muted">
-            Serviços públicos de saúde mental que acolhem pessoas em sofrimento psíquico e apoiam na reinserção social.
+        {% if is_admin %}
+        <form id="form-img-{{contato.id}}"
+              action="{{ url_for('contato.contato_upload_imagem', contato_id=contato.id) }}"
+              method="POST"
+              enctype="multipart/form-data">
+
+          <input type="file"
+                 name="imagem"
+                 id="input-img-{{contato.id}}"
+                 style="display:none;"
+                 onchange="document.getElementById('form-img-{{contato.id}}').submit();">
+        </form>
+        {% endif %}
+
+        <!-- CONTEÚDO -->
+        <div class="card-body d-flex flex-column">
+
+          <h5 class="fw-bold">
+            {{ contato.titulo }}
+          </h5>
+
+          <p class="text-muted flex-grow-1">
+            {{ contato.descricao }}
           </p>
-          <a href="https://www.gov.br/saude/pt-br/composicao/saes/desmad/raps/caps" target="_blank" class="btn botao-roxo mt-2">
+
+          <a href="{{ contato.link }}"
+             target="_blank"
+             class="btn botao-roxo mt-2">
             Acessar
           </a>
+
+          {% if is_admin %}
+          <div class="d-flex gap-2 mt-3">
+
+            <button class="btn btn-sm btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editarContatoModal"
+                    onclick="fillEditContato(
+                      '{{contato.id}}',
+                      `{{contato.titulo}}`,
+                      `{{contato.descricao or ''}}`,
+                      `{{contato.link or ''}}`
+                    )">
+              <i class="bi bi-pencil"></i>
+            </button>
+
+            <form action="{{ url_for('contato.excluir_contato', contato_id=contato.id) }}"
+                  method="POST"
+                  onsubmit="return confirm('Excluir contato?')">
+
+              <button class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i>
+              </button>
+
+            </form>
+
+          </div>
+          {% endif %}
+
         </div>
+
       </div>
+
     </div>
+    {% endfor %}
 
   </div>
+
+  {% endif %}
+
 </div>
+
+<!-- MODAL CADASTRO -->
+<div class="modal fade" id="cadastrarContatoModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form action="{{ url_for('contato.cadastrar_contato') }}"
+            method="POST">
+
+        <div class="modal-header">
+          <h5>Adicionar contato</h5>
+        </div>
+
+        <div class="modal-body">
+
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.titulo.label }}
+            {{ form.titulo(class="form-control") }}
+          </div>
+
+          <div class="mb-3">
+            {{ form.descricao.label }}
+            {{ form.descricao(class="form-control", rows=4) }}
+          </div>
+
+          <div class="mb-3">
+            {{ form.link.label }}
+            {{ form.link(class="form-control") }}
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal fade" id="editarContatoModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form id="editContatoForm"
+            method="POST">
+
+        <div class="modal-header">
+          <h5>Editar contato</h5>
+        </div>
+
+        <div class="modal-body">
+
+          {{ form_ed.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form_ed.titulo.label }}
+            {{ form_ed.titulo(class="form-control", id="edit_titulo") }}
+          </div>
+
+          <div class="mb-3">
+            {{ form_ed.descricao.label }}
+            {{ form_ed.descricao(class="form-control", rows=4, id="edit_descricao") }}
+          </div>
+
+          <div class="mb-3">
+            {{ form_ed.link.label }}
+            {{ form_ed.link(class="form-control", id="edit_link") }}
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          {{ form_ed.submit(class="btn btn-primary") }}
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+function fillEditContato(id, titulo, descricao, link){
+
+    document.getElementById('edit_titulo').value = titulo;
+    document.getElementById('edit_descricao').value = descricao;
+    document.getElementById('edit_link').value = link;
+
+    document.getElementById('editContatoForm').action =
+        "{{ url_for('contato.editar_contato', contato_id=0) }}"
+        .replace('0', id);
+}
+
+</script>
+
+<style>
+
+.contato-card{
+    transition: .2s;
+}
+
+.contato-card:hover{
+    transform: translateY(-5px);
+}
+
+</style>
 
 {% endblock %}

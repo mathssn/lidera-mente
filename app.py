@@ -14,7 +14,7 @@ from modules.agenda.agenda import agenda_bp
 from modules.emocoes.emocoes import emocao_bp
 from modules.feedbacks.feedbacks import feedbacks_bp
 from modules.conteudos.conteudos import conteudos_bp
-
+from modules.contatos.contatos import contatos_bp
 load_dotenv()
 
 app = Flask(__name__)
@@ -48,10 +48,6 @@ def dashboard():
 def sobre():
     return render_template('sobre.html')
 
-@app.route('/apoio')
-def apoio():
-    return render_template('apoio.html')
-
 @app.template_filter('format_date')
 def format_date(value, formato='%d/%m/%Y'):
     if isinstance(value, date):
@@ -62,7 +58,6 @@ def format_date(value, formato='%d/%m/%Y'):
 for i in range(10):
     try:
         print(f"Tentando conectar ao banco... ({i+1}/10)")
-        Base.metadata.create_all(bind=db)
         print("Conectado ao banco com sucesso!")
         break
     except Exception as e:
@@ -77,5 +72,6 @@ app.register_blueprint(agenda_bp)
 app.register_blueprint(emocao_bp)
 app.register_blueprint(feedbacks_bp)
 app.register_blueprint(conteudos_bp)
+app.register_blueprint(contatos_bp)
 if __name__ == '__main__':
     app.run(debug=True, port=4000)
